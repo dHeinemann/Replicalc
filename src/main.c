@@ -3,9 +3,7 @@
 #include <stdio.h>
 #include <string.h>
 
-/* Array limits */
-/*#define MAX_TOKENS 128*/
-#define TOKEN_LEN 20
+#define TOKEN_LEN 20 /* Maximum permitted token length*/
 
 /* Operator associativity */
 #define ASSOC_LEFT 0
@@ -16,12 +14,18 @@
 #define TYPE_OP 1
 #define TYPE_ALPHA 2
 
+/*
+ * Represents a stack of strings.
+ */
 struct Stack {
     int top;
     unsigned capacity;
     char** array;
 };
 
+/*
+ * Create a new stack.
+ */
 struct Stack* stack_new(unsigned capacity) {
     struct Stack* stack = (struct Stack*) malloc(sizeof(struct Stack));
     stack->capacity = capacity;
@@ -31,19 +35,31 @@ struct Stack* stack_new(unsigned capacity) {
     return stack;
 }
 
+/*
+ * De-allocate memory for a stack.
+ */
 void stack_free(struct Stack* stack) {
     free(stack->array);
     free(stack);
 }
 
+/*
+ * Test whether a stack is full.
+ */
 int stack_isFull(struct Stack* stack) {
     return stack->top == stack->capacity -1;
 }
 
+/*
+ * Test whether a stack is empty.
+ */
 int stack_isEmpty(struct Stack* stack) {
     return stack->top == -1;
 }
 
+/*
+ * Push a string onto a stack.
+ */
 void stack_push(struct Stack* stack, char* item) {
     if (stack_isFull(stack)) {
         return;
@@ -52,6 +68,9 @@ void stack_push(struct Stack* stack, char* item) {
     stack->array[++stack->top] = item;
 }
 
+/*
+ * Remove the top-most element from the stack.
+ */
 char* stack_pop(struct Stack* stack) {
     if (stack_isEmpty(stack)) {
         return NULL;
@@ -60,6 +79,9 @@ char* stack_pop(struct Stack* stack) {
     return stack->array[stack->top--];
 }
 
+/*
+ * Get the top-most element from the stack.
+ */
 char* stack_peek(struct Stack* stack) {
     if (stack_isEmpty(stack)) {
         return NULL;
@@ -68,6 +90,9 @@ char* stack_peek(struct Stack* stack) {
     return stack->array[stack->top];
 }
 
+/*
+ * Test whether a string is a math operator.
+ */
 int is_op(char* token) {
     if (!token)
         return 0;
@@ -79,6 +104,9 @@ int is_op(char* token) {
         || strcmp(token, "-") == 0;
 }
 
+/*
+ * Get a token's precedence.
+ */
 int prec(char* token) {
     if (strcmp(token, "^") == 0) { return 10; }
     if (strcmp(token, "/") == 0) { return  5; }
@@ -88,6 +116,9 @@ int prec(char* token) {
     return -1;
 }
 
+/*
+ * Get a token's associativity.
+ */
 int assoc(char* token) {
     if (strcmp(token, "^") == 0) {
         return ASSOC_RIGHT;
@@ -96,18 +127,27 @@ int assoc(char* token) {
     return ASSOC_LEFT;
 }
 
-int is_numeric(int c) {
+/*
+ * Test whether a character is numeric.
+ */
+int is_numeric(char c) {
     return (c >= 48 && c <= 57) /* 0-9 */
         || c == '.'
         || c == ',';
 }
 
-int is_alpha(int c) {
+/*
+ * Test whether a character is a letter.
+ */
+int is_alpha(char c) {
     return (c >= 65 && c <= 90)
         || (c >= 97 && c <= 122);
 }
 
-int is_symbol(int c) {
+/*
+ * Test whether a character is a symbol.
+ */
+int is_symbol(char c) {
     return c == '^'
         || c == '/'
         || c == '*'
@@ -117,6 +157,9 @@ int is_symbol(int c) {
         || c == ')';
 }
 
+/*
+ * Convert an expression into a series of tokens.
+ */
 int tokenize(char expr[], char** tokens) {
     /*char tokens[MAX_TOKENS][TOKEN_LEN];*/
     int i;
@@ -166,6 +209,9 @@ int tokenize(char expr[], char** tokens) {
     return index;
 }
 
+/*
+ * Convert an infix expression to postfix.
+ */
 void infixToPostfix(char** tokens, int length, char** output) {
     int i;
     char* op1;
