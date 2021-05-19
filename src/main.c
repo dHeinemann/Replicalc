@@ -19,14 +19,14 @@
 struct Stack {
     int top;
     unsigned capacity;
-    int* array;
+    char** array;
 };
 
 struct Stack* stack_new(unsigned capacity) {
     struct Stack* stack = (struct Stack*) malloc(sizeof(struct Stack));
     stack->capacity = capacity;
     stack->top = -1;
-    stack->array = (int*) malloc(stack->capacity * sizeof(int));
+    stack->array = (char**) malloc(sizeof(char[capacity][TOKEN_LEN]));
 
     return stack;
 }
@@ -44,7 +44,7 @@ int stack_isEmpty(struct Stack* stack) {
     return stack->top == -1;
 }
 
-void stack_push(struct Stack* stack, int item) {
+void stack_push(struct Stack* stack, char* item) {
     if (stack_isFull(stack)) {
         return;
     }
@@ -52,23 +52,26 @@ void stack_push(struct Stack* stack, int item) {
     stack->array[++stack->top] = item;
 }
 
-int stack_pop(struct Stack* stack) {
+char* stack_pop(struct Stack* stack) {
     if (stack_isEmpty(stack)) {
-        return INT_MIN;
+        return NULL;
     }
 
     return stack->array[stack->top--];
 }
 
-int stack_peek(struct Stack* stack) {
+char* stack_peek(struct Stack* stack) {
     if (stack_isEmpty(stack)) {
-        return INT_MIN;
+        return NULL;
     }
 
     return stack->array[stack->top];
 }
 
 int is_op(char* token) {
+    if (!token)
+        return 0;
+
     return strcmp(token, "^") == 0
         || strcmp(token, "/") == 0
         || strcmp(token, "*") == 0
@@ -154,9 +157,11 @@ int tokenize(char expr[], char** tokens) {
     tokens[index][element] = '\0';
     tokens[++index][0] = '\0';
 
+/*
     for (i = 0; i < index; i++) {
         printf("%s\n", tokens[i]);
     }
+    */
 
     return index;
 }
@@ -166,6 +171,7 @@ void infixToPostfix(char** tokens, int length, char** output) {
     char* op1;
     char* op2;
     struct Stack* ops = stack_new(length);
+    int outputIndex = 0;
 
     for (i = 0; i < length; i++) {
         if (is_op(tokens[i])) {
@@ -174,10 +180,30 @@ void infixToPostfix(char** tokens, int length, char** output) {
                 op2 = stack_peek(ops);
                 if (assoc(op1) == ASSOC_LEFT && prec(op1) <= prec(op2)
                     || assoc(op1) == ASSOC_RIGHT && prec(op1) < prec(op2)) {
-                    //stack_push
+                        output[outputIndex++] = stack_pop(ops);
+                } else {
+                    break;
                 }
             }
+            stack_push(ops, op1);
+        } else if (strcmp(tokens[i], "(") == 0) {
+            stack_push(ops, tokens[i]);
+        } else if (strcmp(tokens[i], ")") == 0) {
+            while (strcmp(stack_peek(ops), "(") != 0) {
+                output[outputIndex++] = stack_pop(ops);
+            }
+            stack_pop(ops); /* Discard left paren */
+        } else {
+            output[outputIndex++] = tokens[i];
         }
+    }
+
+    while (!stack_isEmpty(ops)) {
+        output[outputIndex++] = stack_pop(ops);
+    }
+
+    for (i = 0; i < outputIndex; i++) {
+        printf("%s ", output[i]);
     }
     
     stack_free(ops);
@@ -185,7 +211,7 @@ void infixToPostfix(char** tokens, int length, char** output) {
 
 int main() {
     int i;
-    char* expr = "1 + 1 / 2 mod 3";
+    char* expr = "4 + 4 * 2 / ( 1 - 5 )";
     int numTokens;
 
     char** infixTokens = (char**) malloc(sizeof(char[strlen(expr)][TOKEN_LEN]));
