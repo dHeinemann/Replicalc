@@ -237,18 +237,9 @@ int is_symbol(char c) {
 }
 
 /*
-double ldpow(double value, double exp) {
-    double i;
-    double result = 0;
-    for (i = 0; i < exp; i++)
-}
-*/
-
-/*
  * Convert an expression into a series of tokens.
  */
 int tokenize(char expr[], char** tokens) {
-    /*char tokens[MAX_TOKENS][TOKEN_LEN];*/
     int i;
     int element = 0;
     int index = 0;
@@ -285,12 +276,6 @@ int tokenize(char expr[], char** tokens) {
     }
 
     tokens[index][element] = '\0';
-
-    /*
-    for (i = 0; i < index; i++) {
-        printf("%s\n", tokens[i]);
-    }
-    */
 
     return index + 1;
 }
@@ -333,24 +318,18 @@ int infixToPostfix(char** tokens, int length, char** output) {
     while (!string_stack_isEmpty(ops)) {
         output[outputIndex++] = string_stack_pop(ops);
     }
-
-    /*
-    for (i = 0; i < outputIndex; i++) {
-        printf("%s ", output[i]);
-    }
-    */
     
     string_stack_free(ops);
     return outputIndex;
 }
 
+/*
+ * Evaluate a postfix expression and return the result.
+ */
 double evaluate(char** tokens, int numTokens) {
     int i;
     double result = 0;
 
-    /*
-        4 4 2 * 1 5 - / + 
-    */
     struct Double_Stack* stack = double_stack_new(numTokens);
     for (i = 0; i < numTokens; i++) {
         if (is_op(tokens[i])) {
@@ -371,6 +350,9 @@ double evaluate(char** tokens, int numTokens) {
     return result;
 }
 
+/*
+ * Calculate the result of an expression.
+ */
 double calculate(char* expr) {
     int i;
     int numInfixTokens;
@@ -393,6 +375,9 @@ double calculate(char* expr) {
     return result;
 }
 
+/*
+ * Trim whitespace surrounding a string.
+ */
 char* trim(char* str) {
     int i;
 
