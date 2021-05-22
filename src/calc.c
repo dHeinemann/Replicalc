@@ -215,7 +215,7 @@ double calculate(char* expr) {
         postfixTokens[i] = (char*) malloc(sizeof(char[TOKEN_LEN]));
     }
     int numPostfixTokens = infixToPostfix(infixTokens, numInfixTokens, postfixTokens);
-    int result = evaluate(postfixTokens, numPostfixTokens);
+    double result = evaluate(postfixTokens, numPostfixTokens);
 
     free(infixTokens);
     free(postfixTokens);
