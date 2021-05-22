@@ -1,9 +1,11 @@
+#include <ctype.h>
 #include <limits.h>
 #include <math.h>
 #include <stdlib.h>
 #include <stdio.h>
 #include <string.h>
 
+#define EXPR_LEN 128 /* Maximum buffer size for expression input */
 #define TOKEN_LEN 20 /* Maximum permitted token length*/
 
 /* Operator associativity */
@@ -283,7 +285,6 @@ int tokenize(char expr[], char** tokens) {
     }
 
     tokens[index][element] = '\0';
-    tokens[++index][0] = '\0';
 
     /*
     for (i = 0; i < index; i++) {
@@ -291,7 +292,7 @@ int tokenize(char expr[], char** tokens) {
     }
     */
 
-    return index;
+    return index + 1;
 }
 
 /*
@@ -370,9 +371,8 @@ double evaluate(char** tokens, int numTokens) {
     return result;
 }
 
-int main() {
+double calculate(char* expr) {
     int i;
-    char* expr = "4 + 4 * 2 / ( 1 - 5 )";
     int numInfixTokens;
 
     char** infixTokens = (char**) malloc(sizeof(char[strlen(expr)][TOKEN_LEN]));
@@ -388,9 +388,44 @@ int main() {
     int numPostfixTokens = infixToPostfix(infixTokens, numInfixTokens, postfixTokens);
     int result = evaluate(postfixTokens, numPostfixTokens);
 
-    printf("%d\n", result);
-
     free(infixTokens);
     free(postfixTokens);
+    return result;
+}
+
+char* trim(char* str) {
+    int i;
+
+    /* Trim start */
+    for (i = 0; (size_t) i < strlen(str); i++) {
+        if (!isspace(str[i])) {
+            break;
+        }
+        str++;
+    }
+
+    /* Trim end */
+    for (i = (int) strlen(str) - 1; i >= 0; i--) {
+        if (!isspace(str[i])) {
+            break;
+        }
+        str[i] = '\0';
+    }
+
+    return str;
+}
+
+int main() {
+    double result;
+    char expr[EXPR_LEN];
+    while (1) {
+        printf("> ");
+        fgets(expr, EXPR_LEN, stdin);
+        if (strcmp(trim(expr), "exit") == 0) { break; }
+        if (strcmp(trim(expr), "quit") == 0) { break; }
+
+        result = calculate(expr);
+        printf("%f\n", result);
+    }
     return 0;
 }
