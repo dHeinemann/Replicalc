@@ -1,4 +1,5 @@
 #include <limits.h>
+#include <math.h>
 #include <stdlib.h>
 #include <stdio.h>
 #include <string.h>
@@ -15,79 +16,155 @@
 #define TYPE_ALPHA 2
 
 /*
- * Represents a stack of strings.
+ * Represents a double_stack of strings.
  */
-struct Stack {
+struct Double_Stack {
     int top;
-    unsigned capacity;
+    int capacity;
+    double* array;
+};
+
+/*
+ * Create a new double_stack.
+ */
+struct Double_Stack* double_stack_new(int capacity) {
+    struct Double_Stack* double_stack = (struct Double_Stack*) malloc(sizeof(struct Double_Stack));
+    double_stack->capacity = capacity;
+    double_stack->top = -1;
+    double_stack->array = (double*) malloc(sizeof(double[capacity][TOKEN_LEN]));
+
+    return double_stack;
+}
+
+/*
+ * De-allocate memory for a double_stack.
+ */
+void double_stack_free(struct Double_Stack* double_stack) {
+    free(double_stack->array);
+    free(double_stack);
+}
+
+/*
+ * Test whether a double_stack is full.
+ */
+int double_stack_isFull(struct Double_Stack* double_stack) {
+    return double_stack->top == double_stack->capacity -1;
+}
+
+/*
+ * Test whether a double_stack is empty.
+ */
+int double_stack_isEmpty(struct Double_Stack* double_stack) {
+    return double_stack->top == -1;
+}
+
+/*
+ * Push a string onto a double_stack.
+ */
+void double_stack_push(struct Double_Stack* double_stack, double item) {
+    if (double_stack_isFull(double_stack)) {
+        return;
+    }
+
+    double_stack->array[++double_stack->top] = item;
+}
+
+/*
+ * Remove the top-most element from the double_stack.
+ */
+double double_stack_pop(struct Double_Stack* double_stack) {
+    if (double_stack_isEmpty(double_stack)) {
+        return -1; /* todo */
+    }
+
+    return double_stack->array[double_stack->top--];
+}
+
+/*
+ * Get the top-most element from the double_stack.
+ */
+double double_stack_peek(struct Double_Stack* double_stack) {
+    if (double_stack_isEmpty(double_stack)) {
+        return -1; /* todo */
+    }
+
+    return double_stack->array[double_stack->top];
+}
+
+/*
+ * Represents a string_stack of strings.
+ */
+struct String_Stack {
+    int top;
+    int capacity;
     char** array;
 };
 
 /*
- * Create a new stack.
+ * Create a new string_stack.
  */
-struct Stack* stack_new(unsigned capacity) {
-    struct Stack* stack = (struct Stack*) malloc(sizeof(struct Stack));
-    stack->capacity = capacity;
-    stack->top = -1;
-    stack->array = (char**) malloc(sizeof(char[capacity][TOKEN_LEN]));
+struct String_Stack* string_stack_new(int capacity) {
+    struct String_Stack* string_stack = (struct String_Stack*) malloc(sizeof(struct String_Stack));
+    string_stack->capacity = capacity;
+    string_stack->top = -1;
+    string_stack->array = (char**) malloc(sizeof(char[capacity][TOKEN_LEN]));
 
-    return stack;
+    return string_stack;
 }
 
 /*
- * De-allocate memory for a stack.
+ * De-allocate memory for a string_stack.
  */
-void stack_free(struct Stack* stack) {
-    free(stack->array);
-    free(stack);
+void string_stack_free(struct String_Stack* string_stack) {
+    free(string_stack->array);
+    free(string_stack);
 }
 
 /*
- * Test whether a stack is full.
+ * Test whether a string_stack is full.
  */
-int stack_isFull(struct Stack* stack) {
-    return stack->top == stack->capacity -1;
+int string_stack_isFull(struct String_Stack* string_stack) {
+    return string_stack->top == string_stack->capacity -1;
 }
 
 /*
- * Test whether a stack is empty.
+ * Test whether a string_stack is empty.
  */
-int stack_isEmpty(struct Stack* stack) {
-    return stack->top == -1;
+int string_stack_isEmpty(struct String_Stack* string_stack) {
+    return string_stack->top == -1;
 }
 
 /*
- * Push a string onto a stack.
+ * Push a string onto a string_stack.
  */
-void stack_push(struct Stack* stack, char* item) {
-    if (stack_isFull(stack)) {
+void string_stack_push(struct String_Stack* string_stack, char* item) {
+    if (string_stack_isFull(string_stack)) {
         return;
     }
 
-    stack->array[++stack->top] = item;
+    string_stack->array[++string_stack->top] = item;
 }
 
 /*
- * Remove the top-most element from the stack.
+ * Remove the top-most element from the string_stack.
  */
-char* stack_pop(struct Stack* stack) {
-    if (stack_isEmpty(stack)) {
+char* string_stack_pop(struct String_Stack* string_stack) {
+    if (string_stack_isEmpty(string_stack)) {
         return NULL;
     }
 
-    return stack->array[stack->top--];
+    return string_stack->array[string_stack->top--];
 }
 
 /*
- * Get the top-most element from the stack.
+ * Get the top-most element from the string_stack.
  */
-char* stack_peek(struct Stack* stack) {
-    if (stack_isEmpty(stack)) {
+char* string_stack_peek(struct String_Stack* string_stack) {
+    if (string_stack_isEmpty(string_stack)) {
         return NULL;
     }
 
-    return stack->array[stack->top];
+    return string_stack->array[string_stack->top];
 }
 
 /*
@@ -158,6 +235,14 @@ int is_symbol(char c) {
 }
 
 /*
+double ldpow(double value, double exp) {
+    double i;
+    double result = 0;
+    for (i = 0; i < exp; i++)
+}
+*/
+
+/*
  * Convert an expression into a series of tokens.
  */
 int tokenize(char expr[], char** tokens) {
@@ -168,7 +253,7 @@ int tokenize(char expr[], char** tokens) {
     int lastType = -1;
     int empty;
 
-    for (i = 0; i < strlen(expr); i++) {
+    for (i = 0; (size_t) i < strlen(expr); i++) {
         empty = index == 0 && element == 0;
         if (is_numeric(expr[i])) {
             if (!empty && lastType != TYPE_DIGIT) {
@@ -200,7 +285,7 @@ int tokenize(char expr[], char** tokens) {
     tokens[index][element] = '\0';
     tokens[++index][0] = '\0';
 
-/*
+    /*
     for (i = 0; i < index; i++) {
         printf("%s\n", tokens[i]);
     }
@@ -212,65 +297,98 @@ int tokenize(char expr[], char** tokens) {
 /*
  * Convert an infix expression to postfix.
  */
-void infixToPostfix(char** tokens, int length, char** output) {
+int infixToPostfix(char** tokens, int length, char** output) {
     int i;
     char* op1;
     char* op2;
-    struct Stack* ops = stack_new(length);
+    struct String_Stack* ops = string_stack_new(length);
     int outputIndex = 0;
 
     for (i = 0; i < length; i++) {
         if (is_op(tokens[i])) {
             op1 = tokens[i];
-            while (is_op(stack_peek(ops))) {
-                op2 = stack_peek(ops);
-                if (assoc(op1) == ASSOC_LEFT && prec(op1) <= prec(op2)
-                    || assoc(op1) == ASSOC_RIGHT && prec(op1) < prec(op2)) {
-                        output[outputIndex++] = stack_pop(ops);
+            while (is_op(string_stack_peek(ops))) {
+                op2 = string_stack_peek(ops);
+                if ((assoc(op1) == ASSOC_LEFT && prec(op1) <= prec(op2))
+                    || (assoc(op1) == ASSOC_RIGHT && prec(op1) < prec(op2))) {
+                        output[outputIndex++] = string_stack_pop(ops);
                 } else {
                     break;
                 }
             }
-            stack_push(ops, op1);
+            string_stack_push(ops, op1);
         } else if (strcmp(tokens[i], "(") == 0) {
-            stack_push(ops, tokens[i]);
+            string_stack_push(ops, tokens[i]);
         } else if (strcmp(tokens[i], ")") == 0) {
-            while (strcmp(stack_peek(ops), "(") != 0) {
-                output[outputIndex++] = stack_pop(ops);
+            while (strcmp(string_stack_peek(ops), "(") != 0) {
+                output[outputIndex++] = string_stack_pop(ops);
             }
-            stack_pop(ops); /* Discard left paren */
+            string_stack_pop(ops); /* Discard left paren */
         } else {
             output[outputIndex++] = tokens[i];
         }
     }
 
-    while (!stack_isEmpty(ops)) {
-        output[outputIndex++] = stack_pop(ops);
+    while (!string_stack_isEmpty(ops)) {
+        output[outputIndex++] = string_stack_pop(ops);
     }
 
+    /*
     for (i = 0; i < outputIndex; i++) {
         printf("%s ", output[i]);
     }
+    */
     
-    stack_free(ops);
+    string_stack_free(ops);
+    return outputIndex;
+}
+
+double evaluate(char** tokens, int numTokens) {
+    int i;
+    double result = 0;
+
+    /*
+        4 4 2 * 1 5 - / + 
+    */
+    struct Double_Stack* stack = double_stack_new(numTokens);
+    for (i = 0; i < numTokens; i++) {
+        if (is_op(tokens[i])) {
+            double op2 = double_stack_pop(stack);
+            double op1 = double_stack_pop(stack);
+            if (strcmp(tokens[i], "*") == 0) { double_stack_push(stack, (op1 * op2)); }
+            if (strcmp(tokens[i], "/") == 0) { double_stack_push(stack, (op1 / op2)); }
+            if (strcmp(tokens[i], "+") == 0) { double_stack_push(stack, (op1 + op2)); }
+            if (strcmp(tokens[i], "-") == 0) { double_stack_push(stack, (op1 - op2)); }
+            if (strcmp(tokens[i], "^") == 0) { double_stack_push(stack, pow(op1, op2)); }
+        } else {
+            double_stack_push(stack, strtod(tokens[i], NULL));
+        }
+    }
+
+    result = double_stack_pop(stack);
+    double_stack_free(stack);
+    return result;
 }
 
 int main() {
     int i;
     char* expr = "4 + 4 * 2 / ( 1 - 5 )";
-    int numTokens;
+    int numInfixTokens;
 
     char** infixTokens = (char**) malloc(sizeof(char[strlen(expr)][TOKEN_LEN]));
-    for (i = 0; i < strlen(expr); i++) {
+    for (i = 0; (size_t) i < strlen(expr); i++) {
         infixTokens[i] = (char*) malloc(sizeof(char[TOKEN_LEN]));
     }
-    numTokens = tokenize(expr, infixTokens);
+    numInfixTokens = tokenize(expr, infixTokens);
 
-    char** postfixTokens = (char**) malloc(sizeof(char[numTokens][TOKEN_LEN]));
-    for (i = 0; i < strlen(expr); i++) {
+    char** postfixTokens = (char**) malloc(sizeof(char[numInfixTokens][TOKEN_LEN]));
+    for (i = 0; (size_t) i < strlen(expr); i++) {
         postfixTokens[i] = (char*) malloc(sizeof(char[TOKEN_LEN]));
     }
-    infixToPostfix(infixTokens, numTokens, postfixTokens);
+    int numPostfixTokens = infixToPostfix(infixTokens, numInfixTokens, postfixTokens);
+    int result = evaluate(postfixTokens, numPostfixTokens);
+
+    printf("%d\n", result);
 
     free(infixTokens);
     free(postfixTokens);

@@ -8,7 +8,12 @@
                 "-g",
                 "${file}",
                 "-o",
-                "${fileDirname}/${fileBasenameNoExtension}"
+                "${fileDirname}/${fileBasenameNoExtension}",
+                "--std",
+                "c90",
+                "-lm",
+                "-Wall",
+                "-Wextra"
             ],
             "options": {
                 "cwd": "${workspaceFolder}"
