@@ -1,2 +1,4 @@
 src/build/
+tests/build/
+tests/buildandrun.sh
 .vscode/
