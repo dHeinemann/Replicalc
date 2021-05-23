@@ -17,6 +17,7 @@
 #include <stdlib.h>
 #include <string.h>
 
+#include "calc.h"
 #include "dstack.h"
 #include "strstack.h"
 
@@ -188,7 +189,7 @@ int infixToPostfix(char** tokens, int length, char** output) {
 /*
  * Evaluate a postfix expression and return the result.
  */
-double evaluate(char** tokens, int numTokens) {
+double evaluate(char** tokens, int numTokens, int* errorCode) {
     int i;
     double result = 0;
 
@@ -197,8 +198,15 @@ double evaluate(char** tokens, int numTokens) {
         if (is_op(tokens[i])) {
             double op2 = double_stack_pop(stack);
             double op1 = double_stack_pop(stack);
+            if (strcmp(tokens[i], "/") == 0) {
+                if (op2 == 0) {
+                    *errorCode = Error_DivideByZero;
+                    double_stack_free(stack);
+                    return 0;
+                }
+                double_stack_push(stack, (op1 / op2));
+            }
             if (strcmp(tokens[i], "*") == 0) { double_stack_push(stack, (op1 * op2)); }
-            if (strcmp(tokens[i], "/") == 0) { double_stack_push(stack, (op1 / op2)); }
             if (strcmp(tokens[i], "+") == 0) { double_stack_push(stack, (op1 + op2)); }
             if (strcmp(tokens[i], "-") == 0) { double_stack_push(stack, (op1 - op2)); }
             if (strcmp(tokens[i], "^") == 0) { double_stack_push(stack, pow(op1, op2)); }
@@ -213,11 +221,34 @@ double evaluate(char** tokens, int numTokens) {
 }
 
 /*
- * Calculate the result of an expression.
+ * Check whether an expression has balanced parentheses.
  */
-double calculate(char* expr) {
+int hasBalancedParens(char* expr) {
+    int i;
+    int numParens = 0;
+    for (i = 0; (size_t) i < strlen(expr); i++) {
+        if (expr[i] == '(') {
+            numParens++;
+        } else if (expr[i] == ')') {
+            if (numParens > 0) {
+                numParens--;
+            } else {
+                return 0;
+            }
+        }
+    }
+
+    return numParens == 0;
+}
+
+double calculate(char* expr, int* errorCode) {
     int i;
     int numInfixTokens;
+
+    if (!hasBalancedParens(expr)) {
+        *errorCode = Error_UnbalParens;
+        return 0;
+    }
 
     char** infixTokens = (char**) malloc(sizeof(char[strlen(expr)][TOKEN_LEN]));
     for (i = 0; (size_t) i < strlen(expr); i++) {
@@ -230,9 +261,10 @@ double calculate(char* expr) {
         postfixTokens[i] = (char*) malloc(sizeof(char[TOKEN_LEN]));
     }
     int numPostfixTokens = infixToPostfix(infixTokens, numInfixTokens, postfixTokens);
-    double result = evaluate(postfixTokens, numPostfixTokens);
+    double result = evaluate(postfixTokens, numPostfixTokens, errorCode);
 
     free(infixTokens);
     free(postfixTokens);
+
     return result;
 }

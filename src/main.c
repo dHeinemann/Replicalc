@@ -55,8 +55,19 @@ int main() {
         if (strcmp(trim(expr), "exit") == 0) { break; }
         if (strcmp(trim(expr), "quit") == 0) { break; }
 
-        result = calculate(expr);
-        printf("%f\n", result);
+        int errorCode = Error_Success;
+        result = calculate(expr, &errorCode);
+        switch (errorCode) {
+            case Error_Success:
+                printf("%f\n", result);
+                break;
+            case Error_UnbalParens:
+                printf("Error: Unbalanced parentheses\n");
+                break;
+            case Error_DivideByZero:
+                printf("Error: Division by zero\n");
+                break;
+        }
     }
     return 0;
 }

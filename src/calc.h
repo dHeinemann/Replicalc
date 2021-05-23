@@ -16,9 +16,20 @@
 #ifndef CALC_HEADER
 #define CALC_HEADER
 
+enum Error {
+    /* No error */
+    Error_Success,
+
+    /* Parentheses are unbalanced */
+    Error_UnbalParens,
+
+    /* Division by zero */
+    Error_DivideByZero
+};
+
 /*
  * Calculate the result of an expression.
  */
-double calculate(char* expr);
+double calculate(char* expr, int* errorCode);
 
 #endif
