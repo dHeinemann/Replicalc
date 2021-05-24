@@ -46,9 +46,29 @@ char* trim(char* str) {
     return str;
 }
 
+/*
+ * Trim trailing zeros and period from decimal numbers.
+ */
+void format(double value, char* output) {
+    int i;
+
+    sprintf(output, "%f", value);
+    for (i = (int) strlen(output) - 1; i >= 0; i--) {
+        if (output[i] == '0') {
+            output[i] = '\0';
+        } else {
+            if (output[i] == '.') {
+                output[i] = '\0';
+            }
+            break;
+        }
+    }
+}
+
 int main() {
     double result;
     char expr[EXPR_LEN];
+    char resultStr[EXPR_LEN];
     while (1) {
         printf("> ");
         fgets(expr, EXPR_LEN, stdin);
@@ -59,7 +79,8 @@ int main() {
         result = calculate(expr, &errorCode);
         switch (errorCode) {
             case Error_Success:
-                printf("%f\n", result);
+                format(result, resultStr);
+                printf("%s\n", resultStr);
                 break;
             case Error_UnbalParens:
                 printf("Error: Unbalanced parentheses\n");
