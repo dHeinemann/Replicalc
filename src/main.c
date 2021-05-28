@@ -65,17 +65,30 @@ void format(double value, char* output) {
     }
 }
 
+/*
+ * Detect exit attempt.
+ */
+int isQuit(char* expr) {
+    if (strcmp(trim(expr), "exit") == 0) { return 1; }
+    if (strcmp(trim(expr), "quit") == 0) { return 1; }
+    if (strcmp(trim(expr), "q")    == 0) { return 1; }
+    return 0;
+}
+
 int main() {
     double result;
+    int errorCode;
     char expr[EXPR_LEN];
     char resultStr[EXPR_LEN];
+
     while (1) {
         printf("> ");
         fgets(expr, EXPR_LEN, stdin);
-        if (strcmp(trim(expr), "exit") == 0) { break; }
-        if (strcmp(trim(expr), "quit") == 0) { break; }
+        if (isQuit(expr)) {
+            break;
+        }
 
-        int errorCode = Error_Success;
+        errorCode = Error_Success;
         result = calculate(expr, &errorCode);
         switch (errorCode) {
             case Error_Success:
