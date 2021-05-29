@@ -1,8 +1,8 @@
 CC = gcc
-cflags = --std c90 -lm
-debug_flags = -Wall -Wextra
+cflags = --std c90 -lm -lncurses
+debug_flags = -O0 -da -Wall -Wextra
 
-deps = src/dstack.c src/strstack.c src/calc.c
+deps = src/dstack.c src/strstack.c src/calc.c src/chartype.c
 test_deps = $(deps) Unity/src/unity.c
 
 rcalc:

@@ -18,6 +18,7 @@
 #include <string.h>
 
 #include "calc.h"
+#include "chartype.h"
 #include "dstack.h"
 #include "strstack.h"
 
@@ -67,36 +68,6 @@ int assoc(char* token) {
     }
 
     return ASSOC_LEFT;
-}
-
-/*
- * Test whether a character is numeric.
- */
-int is_numeric(char c) {
-    return (c >= 48 && c <= 57) /* 0-9 */
-        || c == '.'
-        || c == ',';
-}
-
-/*
- * Test whether a character is a letter.
- */
-int is_alpha(char c) {
-    return (c >= 65 && c <= 90)
-        || (c >= 97 && c <= 122);
-}
-
-/*
- * Test whether a character is a symbol.
- */
-int is_symbol(char c) {
-    return c == '^'
-        || c == '/'
-        || c == '*'
-        || c == '+'
-        || c == '-'
-        || c == '('
-        || c == ')';
 }
 
 /*

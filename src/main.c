@@ -14,10 +14,12 @@
  */
 
 #include <ctype.h>
+#include <ncurses.h>
 #include <stdio.h>
 #include <string.h>
 
 #include "calc.h"
+#include "chartype.h"
 
 #define EXPR_LEN 128 /* Maximum buffer size for expression input */
 
@@ -75,33 +77,129 @@ int isQuit(char* expr) {
     return 0;
 }
 
-int main() {
+/*
+ * Display an input prompt.
+ */
+int prompt() {
+    addstr("> ");
+    return getcurx(stdscr);
+}
+
+/*
+ * Scroll the window upward to free up the given number of lines.
+ */
+void scrolllines(int num) {
+    int i;
+    int origY = getcury(stdscr);
+    if (getcury(stdscr) + num <= LINES) {
+        return;
+    }
+
+    move(0, getcurx(stdscr));
+    for (i = 0; i < num; i++) {
+        deleteln();
+    }
+    move(origY - num, getcurx(stdscr));
+}
+
+/*
+ * Handle ncurses keyboard input.
+ *
+ * ch: Button pressed.
+ * startIndex: Column at which text input begins.
+ * length: Maximum length of text input.
+ */
+int handle_input(int ch, int startIndex, int* length) {
     double result;
     int errorCode;
     char expr[EXPR_LEN];
     char resultStr[EXPR_LEN];
 
-    while (1) {
-        printf("> ");
-        fgets(expr, EXPR_LEN, stdin);
+    if (ch == KEY_LEFT) {
+        if (getcurx(stdscr) > startIndex) {
+            move(getcury(stdscr), getcurx(stdscr) - 1);
+        }
+    } else if (ch == KEY_RIGHT) {
+        if (getcurx(stdscr) <= *length + 1) {
+            move(getcury(stdscr), getcurx(stdscr) + 1);
+        }
+    } else if (ch == KEY_BACKSPACE || ch == 127 || ch == '\b') {
+        if (getcurx(stdscr) > startIndex) {
+            mvdelch(getcury(stdscr), getcurx(stdscr) - 1);
+            (*length)--;
+        }
+    } else if (ch == KEY_DC) {
+        if (getcurx(stdscr) <= *length + 1) {
+            delch();
+            (*length)--;
+        }
+    } else if (ch == KEY_ENTER || ch == '\n') {
+        mvinnstr(getcury(stdscr), startIndex, expr, EXPR_LEN);
         if (isQuit(expr)) {
-            break;
+            return 0;
         }
 
+        scrolllines(2);
         errorCode = Error_Success;
-        result = calculate(expr, &errorCode);
+        result = calculate(trim(expr), &errorCode);
+        move(getcury(stdscr) + 1, 0);
         switch (errorCode) {
             case Error_Success:
                 format(result, resultStr);
-                printf("%s\n", resultStr);
+                insstr(resultStr);
                 break;
             case Error_UnbalParens:
-                printf("Error: Unbalanced parentheses\n");
+                insstr("Error: Unbalanced parentheses");
                 break;
             case Error_DivideByZero:
-                printf("Error: Division by zero\n");
+                insstr("Error: Division by zero");
                 break;
         }
+        move(getcury(stdscr) + 1, 0);
+        prompt();
+    } else if (is_numeric(ch) || is_alpha(ch) || is_symbol(ch) || ch == ' ') {
+        if (getcurx(stdscr) <= *length + 1) {
+            insch(ch);
+            move(getcury(stdscr), getcurx(stdscr) + 1);
+        } else {
+            addch(ch);
+        }
+        (*length)++;
     }
+
+    return 1;
+}
+
+/*
+ * Show copyright disclaimer.
+ */
+void copyright() {
+    mvinsstr(0, 0, "Replicalc, Copyright (C) 2021 David Heinemann");
+    mvinsstr(1, 0, "Replicalc comes with ABSOLUTELY NO WARRANTY.");
+    mvinsstr(2, 0, "This is free software, and you are welcome to redistribute it");
+    mvinsstr(3, 0, "under certain conditions. See the LICENSE file for details.");
+    move(5, 0);
+}
+
+int main() {
+    int startIndex;
+    int length = 0;
+    int running = 1;
+
+    /* Init ncurses */
+    initscr();
+    cbreak();
+    noecho();
+    keypad(stdscr, 1);
+
+    copyright();
+    startIndex = prompt();
+
+    /* Main loop */
+    while (running) {
+        running = handle_input(getch(), startIndex, &length);
+    }
+
+    endwin();
     return 0;
 }
