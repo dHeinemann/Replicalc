@@ -1,4 +1,3 @@
-src/build/
-tests/build/
-tests/buildandrun.sh
+todo.txt
+build/
 .vscode/
