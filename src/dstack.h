@@ -28,7 +28,7 @@ struct Double_Stack {
 /*
  * Create a new double_stack.
  */
-struct Double_Stack* double_stack_new(int capacity, int length);
+struct Double_Stack* double_stack_new();
 
 /*
  * De-allocate memory for a double_stack.

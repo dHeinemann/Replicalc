@@ -28,7 +28,7 @@ struct String_Stack {
 /*
  * Create a new string_stack.
  */
-struct String_Stack* string_stack_new(int capacity, int length);
+struct String_Stack* string_stack_new();
 
 /*
  * De-allocate memory for a string_stack.

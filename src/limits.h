@@ -13,22 +13,12 @@
  * GNU General Public License for more details.
  */
 
-#ifndef CHARTYPE_H
-#define CHARTYPE_H
+#ifndef LIMITS_H
+#define LIMITS_H
 
-/*
- * Test whether a character is numeric.
- */
-int is_numeric(char c);
-
-/*
- * Test whether a character is a letter.
- */
-int is_alpha(char c);
-
-/*
- * Test whether a character is a symbol.
- */
-int is_symbol(char c);
+#define TOKEN_LEN 20        /* Maximum num characters in a token */
+#define ARRAY_MAX_ELEM 128  /* Maximum num elements in an array */
+#define STACK_MAX_CAP 128   /* Maximum num elements in a stack */
+#define EXPR_MAX_WIDTH 1024 /* Maximum num characters in an expression */
 
 #endif

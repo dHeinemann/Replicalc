@@ -20,9 +20,8 @@
 #include "calc.h"
 #include "chartype.h"
 #include "dstack.h"
+#include "limits.h"
 #include "strstack.h"
-
-#define TOKEN_LEN 20 /* Maximum permitted token length*/
 
 /* Operator associativity */
 #define ASSOC_LEFT 0
@@ -121,7 +120,7 @@ int infixToPostfix(char** tokens, int length, char** output) {
     int i;
     char* op1;
     char* op2;
-    struct String_Stack* ops = string_stack_new(length, TOKEN_LEN);
+    struct String_Stack* ops = string_stack_new();
     int outputIndex = 0;
 
     for (i = 0; i < length; i++) {
@@ -164,7 +163,7 @@ double evaluate(char** tokens, int numTokens, int* errorCode) {
     int i;
     double result = 0;
 
-    struct Double_Stack* stack = double_stack_new(numTokens, TOKEN_LEN);
+    struct Double_Stack* stack = double_stack_new();
     for (i = 0; i < numTokens; i++) {
         if (is_op(tokens[i])) {
             double op2 = double_stack_pop(stack);
@@ -213,29 +212,34 @@ int hasBalancedParens(char* expr) {
 }
 
 double calculate(char* expr, int* errorCode) {
+    double result;
     int i;
+
+    char** infixtokens;
     int numInfixTokens;
+    char** postfixtokens;
+    int numpostfixtokens;
 
     if (!hasBalancedParens(expr)) {
         *errorCode = Error_UnbalParens;
         return 0;
     }
 
-    char** infixTokens = (char**) malloc(sizeof(char[strlen(expr)][TOKEN_LEN]));
+    infixtokens = (char**) malloc(sizeof(char[ARRAY_MAX_ELEM][TOKEN_LEN]));
     for (i = 0; (size_t) i < strlen(expr); i++) {
-        infixTokens[i] = (char*) malloc(sizeof(char[TOKEN_LEN]));
+        infixtokens[i] = (char*) malloc(sizeof(char[TOKEN_LEN]));
     }
-    numInfixTokens = tokenize(expr, infixTokens);
+    numInfixTokens = tokenize(expr, infixtokens);
 
-    char** postfixTokens = (char**) malloc(sizeof(char[numInfixTokens][TOKEN_LEN]));
+    postfixtokens = (char**) malloc(sizeof(char[ARRAY_MAX_ELEM][TOKEN_LEN]));
     for (i = 0; (size_t) i < strlen(expr); i++) {
-        postfixTokens[i] = (char*) malloc(sizeof(char[TOKEN_LEN]));
+        postfixtokens[i] = (char*) malloc(sizeof(char[TOKEN_LEN]));
     }
-    int numPostfixTokens = infixToPostfix(infixTokens, numInfixTokens, postfixTokens);
-    double result = evaluate(postfixTokens, numPostfixTokens, errorCode);
+    numpostfixtokens = infixToPostfix(infixtokens, numInfixTokens, postfixtokens);
+    result = evaluate(postfixtokens, numpostfixtokens, errorCode);
 
-    free(infixTokens);
-    free(postfixTokens);
+    free(infixtokens);
+    free(postfixtokens);
 
     return result;
 }
