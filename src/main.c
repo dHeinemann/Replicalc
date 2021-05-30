@@ -13,69 +13,13 @@
  * GNU General Public License for more details.
  */
 
-#include <ctype.h>
 #include <ncurses.h>
-#include <stdio.h>
-#include <string.h>
 
 #include "calc.h"
 #include "chartype.h"
+#include "strfun.h"
 
 #define EXPR_LEN 128 /* Maximum buffer size for expression input */
-
-/*
- * Trim whitespace surrounding a string.
- */
-char* trim(char* str) {
-    int i;
-
-    /* Trim start */
-    for (i = 0; (size_t) i < strlen(str); i++) {
-        if (!isspace(str[i])) {
-            break;
-        }
-        str++;
-    }
-
-    /* Trim end */
-    for (i = (int) strlen(str) - 1; i >= 0; i--) {
-        if (!isspace(str[i])) {
-            break;
-        }
-        str[i] = '\0';
-    }
-
-    return str;
-}
-
-/*
- * Trim trailing zeros and period from decimal numbers.
- */
-void format(double value, char* output) {
-    int i;
-
-    sprintf(output, "%f", value);
-    for (i = (int) strlen(output) - 1; i >= 0; i--) {
-        if (output[i] == '0') {
-            output[i] = '\0';
-        } else {
-            if (output[i] == '.') {
-                output[i] = '\0';
-            }
-            break;
-        }
-    }
-}
-
-/*
- * Detect exit attempt.
- */
-int isQuit(char* expr) {
-    if (strcmp(trim(expr), "exit") == 0) { return 1; }
-    if (strcmp(trim(expr), "quit") == 0) { return 1; }
-    if (strcmp(trim(expr), "q")    == 0) { return 1; }
-    return 0;
-}
 
 /*
  * Display an input prompt.
