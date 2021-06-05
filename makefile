@@ -1,22 +1,40 @@
-CC = gcc
-cflags = --std c90 -lm -lncurses
-debug_flags = -O0 -da -Wall -Wextra
+CFLAGS = --std c90
+LDFLAGS = -lm -lncurses
+DBFLAGS = -g -O0 -da -Wall -Wextra
 
-deps = src/dstack.c src/strstack.c src/calc.c src/chartype.c src/strfun.c src/ncursesui.c
-test_deps = $(deps) Unity/src/unity.c
+rcalc: builddir ncursesui.o
+	$(CC) $(CFLAGS) $(LDFLAGS) src/main.c -o build/rcalc build/*.o
 
-rcalc:
+run: rcalc
+	./build/rcalc
+
+builddir:
 	@mkdir -p build
-	$(CC) src/main.c -o build/rcalc $(deps) $(cflags)
 
-debug:
-	@mkdir -p build
-	$(CC) -g src/main.c -o build/rcalc $(deps) $(cflags) $(debug_flags)
+ncursesui.o: calc.o chartype.o strfun.o
+	$(CC) $(CFLAGS) -c src/ncursesui.c -o build/ncursesui.o
 
-test:
-	@mkdir -p build
-	$(CC) tests/tests.c -o build/tests $(test_deps) $(cflags) $(debug_flags)
+calc.o: chartype.o dstack.o strstack.o
+	$(CC) $(CFLAGS) -c src/calc.c -o build/calc.o
+
+chartype.o:
+	$(CC) $(CFLAGS) -c src/chartype.c -o build/chartype.o
+
+strfun.o:
+	$(CC) $(CFLAGS) -c src/strfun.c -o build/strfun.o
+
+dstack.o:
+	$(CC) $(CFLAGS) -c src/dstack.c -o build/dstack.o
+
+strstack.o:
+	$(CC) $(CFLAGS) -c src/strstack.c -o build/strstack.o
+
+debug: builddir ncursesui.o
+	$(CC) $(CFLAGS) $(LDFLAGS) $(DBFLAGS) src/main.c -o build/rcalc build/*.o
+
+test: debug
+	$(CC) $(CFLAGS) $(LDFLAGS) $(DBFLAGS) tests/tests.c -o build/tests build/*.o Unity/src/unity.c
 	@./build/tests
 
 clean:
-	@rm build/rcalc build/tests
+	$(RM) build/*
