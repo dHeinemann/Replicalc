@@ -81,7 +81,8 @@ int tokenize(char expr[], char** tokens) {
 
     for (i = 0; (size_t) i < strlen(expr); i++) {
         empty = index == 0 && element == 0;
-        if (is_numeric(expr[i])) {
+        if (is_numeric(expr[i])
+            || (i < strlen(expr) - 1 && expr[i] == '-' && is_numeric(expr[i+1]))) {
             if (!empty && lastType != TYPE_DIGIT) {
                 tokens[index++][element] = '\0';
                 element = 0;
