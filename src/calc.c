@@ -131,7 +131,7 @@ int infixToPostfix(char** tokens, int length, char** output) {
                 op2 = string_stack_peek(ops);
                 if ((assoc(op1) == ASSOC_LEFT && prec(op1) <= prec(op2))
                     || (assoc(op1) == ASSOC_RIGHT && prec(op1) < prec(op2))) {
-                        output[outputIndex++] = string_stack_pop(ops);
+                        strcpy(output[outputIndex++], string_stack_pop(ops));
                 } else {
                     break;
                 }
@@ -141,16 +141,16 @@ int infixToPostfix(char** tokens, int length, char** output) {
             string_stack_push(ops, tokens[i]);
         } else if (strcmp(tokens[i], ")") == 0) {
             while (strcmp(string_stack_peek(ops), "(") != 0) {
-                output[outputIndex++] = string_stack_pop(ops);
+                strcpy(output[outputIndex++], string_stack_pop(ops));
             }
             string_stack_pop(ops); /* Discard left paren */
         } else {
-            output[outputIndex++] = tokens[i];
+            strcpy(output[outputIndex++], tokens[i]);
         }
     }
 
     while (!string_stack_isEmpty(ops)) {
-        output[outputIndex++] = string_stack_pop(ops);
+        strcpy(output[outputIndex++], string_stack_pop(ops));
     }
     
     string_stack_free(ops);
@@ -239,6 +239,12 @@ double calculate(char* expr, int* errorCode) {
     numpostfixtokens = infixToPostfix(infixtokens, numInfixTokens, postfixtokens);
     result = evaluate(postfixtokens, numpostfixtokens, errorCode);
 
+    for (i = 0; (size_t) i < strlen(expr); i++) {
+        if (infixtokens[i]) {
+            free(infixtokens[i]);
+            free(postfixtokens[i]);
+        }
+    }
     free(infixtokens);
     free(postfixtokens);
 
