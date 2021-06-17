@@ -22,7 +22,7 @@ struct String_Stack* string_stack_new() {
     struct String_Stack* string_stack = (struct String_Stack*) malloc(sizeof(struct String_Stack));
     string_stack->capacity = STACK_MAX_CAP;
     string_stack->top = -1;
-    string_stack->array = (char**) malloc(sizeof(char[STACK_MAX_CAP][EXPR_MAX_WIDTH]));
+    string_stack->array = (char**) malloc(sizeof(char[STACK_MAX_CAP]));
 
     return string_stack;
 }

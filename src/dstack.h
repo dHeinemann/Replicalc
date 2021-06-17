@@ -17,7 +17,7 @@
 #define DSTACK_HEADER
 
 /*
- * Represents a double_stack of strings.
+ * Represents a stack of doubles.
  */
 struct Double_Stack {
     int top;

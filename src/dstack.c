@@ -22,7 +22,7 @@ struct Double_Stack* double_stack_new() {
     struct Double_Stack* double_stack = (struct Double_Stack*) malloc(sizeof(struct Double_Stack));
     double_stack->capacity = STACK_MAX_CAP;
     double_stack->top = -1;
-    double_stack->array = (double*) malloc(sizeof(double[STACK_MAX_CAP][EXPR_MAX_WIDTH]));
+    double_stack->array = (double*) malloc(sizeof(double[STACK_MAX_CAP]));
 
     return double_stack;
 }
