@@ -2,7 +2,7 @@ CFLAGS = --std c90
 LDFLAGS = -lm -lncurses
 DBFLAGS = -g -O0 -da -Wall -Wextra
 
-rcalc: builddir ncursesui.o
+rcalc: builddir cursesui.o
 	$(CC) $(CFLAGS) $(LDFLAGS) src/main.c -o build/rcalc build/*.o
 
 run: rcalc
@@ -11,8 +11,8 @@ run: rcalc
 builddir:
 	@mkdir -p build
 
-ncursesui.o: calc.o chartype.o strfun.o
-	$(CC) $(CFLAGS) -c src/ncursesui.c -o build/ncursesui.o
+cursesui.o: calc.o chartype.o strfun.o
+	$(CC) $(CFLAGS) -c src/cursesui.c -o build/cursesui.o
 
 calc.o: chartype.o dstack.o strstack.o
 	$(CC) $(CFLAGS) -c src/calc.c -o build/calc.o

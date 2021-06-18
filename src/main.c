@@ -13,7 +13,7 @@
  * GNU General Public License for more details.
  */
 
-#include "ncursesui.h"
+#include "cursesui.h"
 
 int main() {
     int copylen = 4;
