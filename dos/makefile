@@ -1,4 +1,4 @@
-CFLAGS = -bt=dos -ml
+CFLAGS = -bt=dos -mm
 LDFLAGS = ..\pdcurses\dos\pdcurses.lib
 
 
@@ -29,7 +29,7 @@ strstack.o:
 .NOCHECK
 pdcurses:
 	cd ..\pdcurses\dos
-	wmake -f makefile.wcc
+	wmake -f makefile.wcc MODEL=m
 	cd ..\..\dos
 
 clean:
