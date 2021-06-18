@@ -103,6 +103,8 @@ int handle_input(int ch, int startIndex, int* length) {
                 insstr("Error: Division by zero");
                 break;
         }
+
+        *length = 0;
         move(getcury(stdscr) + 1, 0);
         prompt();
     } else if (is_numeric(ch) || is_alpha(ch) || is_symbol(ch) || ch == ' ') {
