@@ -34,4 +34,5 @@ test: debug
 	@./tests
 
 clean:
-	$(RM) *
+	$(RM) *.o
+	$(RM) rcalc
