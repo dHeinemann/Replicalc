@@ -1,7 +1,7 @@
-PDCURSES = ..\pdcurses\dos
-CC = wcc
-CCL = wcl
-CFLAGS = -bt=dos -mm
+PDCURSES = ..\pdcurses\wincon
+CC = wcc386
+CCL = wcl386
+CFLAGS = -bt=nt -mf
 LDFLAGS = $(PDCURSES)\pdcurses.lib
 
 rcalc: cursesui.o
@@ -31,8 +31,8 @@ strstack.o:
 .NOCHECK
 pdcurses:
 	cd $(PDCURSES)
-	wmake -f makefile.wcc MODEL=m
-	cd ..\..\dos
+	wmake -f makefile.wcc
+	cd ..\..\win32
 
 clean:
 	rm *.o

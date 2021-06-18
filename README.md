@@ -1,6 +1,6 @@
 # Replicalc
 
-Replicalc is a simple keyboard-driven calculator for Linux and MS-DOS.
+Replicalc is a simple keyboard-driven calculator for Linux, Windows, and MS-DOS.
 Expressions are evaluated inside a REPL, similar to the classic TI-83
 calculator.
 
@@ -33,7 +33,7 @@ Additional operators are forthcoming.
 
 ## Compiling
 
-Before proceeding, initialize all submodules if you haven't already done so:
+Before proceeding, initialize all Git submodules if you haven't already done so:
 
 ```
 git submodule init
@@ -43,12 +43,18 @@ git submodule update
 ### Linux
 
 1. Install the ncurses development library. For example (Fedora): `sudo dnf install ncurses-devel`
-2. Navigate to the repository root.
+2. Navigate to the `linux` directory.
 2. Run `make`.
 
-### MS-DOS
+### Windows 95, 98, ME, 2000, XP, 7, 8, 10
 
-1. Install the [Open Watcom compiler](http://openwatcom.org).
+1. Install the [Open Watcom compiler for Windows](http://openwatcom.org).
+2. Navigate to the `win32` directory.
+2. Run `wmake`.
+
+### MS-DOS, Windows 1, 2, 3
+
+1. Install the [Open Watcom compiler for DOS](http://openwatcom.org).
 2. Navigate to the `dos` directory.
 2. Run `wmake`.
 

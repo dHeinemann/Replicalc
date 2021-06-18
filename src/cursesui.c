@@ -13,7 +13,7 @@
  * GNU General Public License for more details.
  */
 
-#if defined(__DOS__)
+#if defined(__DOS__) || defined(__NT__)
 #include <curses.h>
 #else
 #include <ncurses.h>
