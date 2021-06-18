@@ -1,3 +1,10 @@
 todo.txt
 build/
+dosh/
 .vscode/
+
+# Open Watcom build files and junk
+*.ERR
+*.EXE
+*.O
+*.OBJ

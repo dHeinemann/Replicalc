@@ -1,7 +1,8 @@
 # Replicalc
 
-Replicalc is a simple keyboard-driven calculator. Expressions are evaluated
-inside a REPL, similar to the classic TI-83 calculator.
+Replicalc is a simple keyboard-driven calculator for Linux and MS-DOS.
+Expressions are evaluated inside a REPL, similar to the classic TI-83
+calculator.
 
 **"Screenshot":**
 
@@ -15,13 +16,6 @@ under certain conditions. See the LICENSE file for details.
 25
 >
 ```
-
-Replicalc currently uses an ncurses-based interface. Additional interfaces for
-other platforms are planned:
-
-* conio.h for DOS/Windows
-* Win16 for Windows
-* GTK for Linux
 
 ## Status
 
@@ -39,11 +33,24 @@ Additional operators are forthcoming.
 
 ## Compiling
 
-First, install the ncurses development library:
+Before proceeding, initialize all submodules if you haven't already done so:
 
-* **Fedora:** `sudo dnf install ncurses-devel`
+```
+git submodule init
+git submodule update
+```
 
-Next, run `make` in the repository root.
+### Linux
+
+1. Install the ncurses development library. For example (Fedora): `sudo dnf install ncurses-devel`
+2. Navigate to the repository root.
+2. Run `make`.
+
+### MS-DOS
+
+1. Install the [Open Watcom compiler](http://openwatcom.org).
+2. Navigate to the `dos` directory.
+2. Run `wmake`.
 
 ## License
 

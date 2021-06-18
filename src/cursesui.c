@@ -13,7 +13,11 @@
  * GNU General Public License for more details.
  */
 
+#if defined(__DOS__)
+#include <curses.h>
+#else
 #include <ncurses.h>
+#endif
 
 #include "calc.h"
 #include "chartype.h"
