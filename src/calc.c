@@ -74,7 +74,8 @@ int assoc(char* token) {
  */
 int is_negative(char expr[], int i) {
     int nextCharIsNum; /* Negative sign is to the immediate left of the number that follows. */
-    int lastCharIsOp;
+    int lastCharIsSymbol;
+    int lastCharIsSpace;
     if (expr[i] != '-') {
         return 0;
     }
@@ -86,8 +87,9 @@ int is_negative(char expr[], int i) {
     }
 
     /* Negative sign belongs to a number */
-    lastCharIsOp = is_op(&expr[i-1]);
-    if (nextCharIsNum && lastCharIsOp) {
+    lastCharIsSymbol = is_symbol(expr[i-1]);
+    lastCharIsSpace = expr[i-1] == ' ';
+    if (nextCharIsNum && (lastCharIsSymbol || lastCharIsSpace)) {
         return 1;
     }
 
@@ -190,7 +192,7 @@ int infixToPostfix(char** tokens, int length, char** output) {
  */
 double evaluate(char** tokens, int numTokens, int* errorCode) {
     int i;
-    double result = 0;
+    double result;
 
     struct Double_Stack* stack = double_stack_new();
     for (i = 0; i < numTokens; i++) {

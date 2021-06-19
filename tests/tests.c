@@ -41,6 +41,12 @@ void calculate_divideByZero_ReturnsError() {
     TEST_ASSERT_EQUAL(Error_DivideByZero, errorCode);
 }
 
+void calculate_divideByNegativeZero_ReturnsError() {
+    int errorCode = 0;
+    calculate("1 / -0", &errorCode);
+    TEST_ASSERT_EQUAL(Error_DivideByZero, errorCode);
+}
+
 void calculate_complexExpressionWithoutSpaces_EvaluatesCorrectly() {
     int errorCode;
     int result;
@@ -77,6 +83,7 @@ int main(void) {
     RUN_TEST(calculate_unbalancedOpenParen_ReturnsError);
     RUN_TEST(calculate_unbalancedCloseParen_ReturnsError);
     RUN_TEST(calculate_divideByZero_ReturnsError);
+    RUN_TEST(calculate_divideByNegativeZero_ReturnsError);
     RUN_TEST(calculate_complexExpressionWithSpaces_EvaluatesCorrectly);
     RUN_TEST(calculate_complexExpressionWithoutSpaces_EvaluatesCorrectly);
     RUN_TEST(calculate_complexExpression_EvaluatesWithCorrectPrecedence);
