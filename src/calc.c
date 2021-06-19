@@ -70,19 +70,47 @@ int assoc(char* token) {
 }
 
 /*
+ * Check whether the character at i is the negative sign for the number that follows.
+ */
+int is_negative(char expr[], int i) {
+    int nextCharIsNum; /* Negative sign is to the immediate left of the number that follows. */
+    int lastCharIsOp;
+    if (expr[i] != '-') {
+        return 0;
+    }
+
+    /* Expression begins with a negative number */
+    nextCharIsNum = (size_t) i < strlen(expr) && is_numeric(expr[i+1]);
+    if (i == 0 && nextCharIsNum) {
+        return 1;
+    }
+
+    /* Negative sign belongs to a number */
+    lastCharIsOp = is_op(&expr[i-1]);
+    if (nextCharIsNum && lastCharIsOp) {
+        return 1;
+    }
+
+    return 0;
+}
+
+/*
  * Convert an expression into a series of tokens.
  */
 int tokenize(char expr[], char** tokens) {
     int i;
-    int element = 0;
-    int index = 0;
-    int lastType = -1;
+    int element;
+    int index;
+    int lastType;
     int empty;
+
+    element = 0;
+    index = 0;
+    lastType = -1;
 
     for (i = 0; (size_t) i < strlen(expr); i++) {
         empty = index == 0 && element == 0;
-        if (is_numeric(expr[i])
-            || (i < strlen(expr) - 1 && expr[i] == '-' && is_numeric(expr[i+1]))) {
+        if (is_numeric(expr[i]) || is_negative(expr, i)) {
             if (!empty && lastType != TYPE_DIGIT) {
                 tokens[index++][element] = '\0';
                 element = 0;
@@ -217,7 +245,7 @@ double calculate(char* expr, int* errorCode) {
     int i;
 
     char** infixtokens;
-    int numInfixTokens;
+    int numinfixtokens;
     char** postfixtokens;
     int numpostfixtokens;
 
@@ -230,13 +258,13 @@ double calculate(char* expr, int* errorCode) {
     for (i = 0; (size_t) i < strlen(expr); i++) {
         infixtokens[i] = (char*) malloc(sizeof(char[TOKEN_LEN]));
     }
-    numInfixTokens = tokenize(expr, infixtokens);
+    numinfixtokens = tokenize(expr, infixtokens);
 
     postfixtokens = (char**) malloc(sizeof(char[ARRAY_MAX_ELEM][TOKEN_LEN]));
     for (i = 0; (size_t) i < strlen(expr); i++) {
         postfixtokens[i] = (char*) malloc(sizeof(char[TOKEN_LEN]));
     }
-    numpostfixtokens = infixToPostfix(infixtokens, numInfixTokens, postfixtokens);
+    numpostfixtokens = infixToPostfix(infixtokens, numinfixtokens, postfixtokens);
     result = evaluate(postfixtokens, numpostfixtokens, errorCode);
 
     for (i = 0; (size_t) i < strlen(expr); i++) {

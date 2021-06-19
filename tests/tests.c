@@ -41,11 +41,44 @@ void calculate_divideByZero_ReturnsError() {
     TEST_ASSERT_EQUAL(Error_DivideByZero, errorCode);
 }
 
+void calculate_complexExpressionWithoutSpaces_EvaluatesCorrectly() {
+    int errorCode;
+    int result;
+
+    errorCode = 0;
+    result = calculate("3*2+4*5-6", &errorCode);
+
+    TEST_ASSERT_EQUAL(20, result);
+}
+
+void calculate_complexExpressionWithSpaces_EvaluatesCorrectly() {
+    int errorCode;
+    int result;
+
+    errorCode = 0;
+    result = calculate("3 * 2 + 4 * 5 - 6", &errorCode);
+
+    TEST_ASSERT_EQUAL(20, result);
+}
+
+void calculate_complexExpression_EvaluatesWithCorrectPrecedence() {
+    int errorCode;
+    int result;
+
+    errorCode = 0;
+    result = calculate("3*2+4*5-6/3", &errorCode);
+
+    TEST_ASSERT_EQUAL(24, result);
+}
+
 int main(void) {
     UNITY_BEGIN();
     RUN_TEST(calculate_onePlusOne_Returns2);
     RUN_TEST(calculate_unbalancedOpenParen_ReturnsError);
     RUN_TEST(calculate_unbalancedCloseParen_ReturnsError);
     RUN_TEST(calculate_divideByZero_ReturnsError);
+    RUN_TEST(calculate_complexExpressionWithSpaces_EvaluatesCorrectly);
+    RUN_TEST(calculate_complexExpressionWithoutSpaces_EvaluatesCorrectly);
+    RUN_TEST(calculate_complexExpression_EvaluatesWithCorrectPrecedence);
     return UNITY_END();
 }
