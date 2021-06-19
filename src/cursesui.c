@@ -19,35 +19,20 @@
 #include <ncurses.h>
 #endif
 
+#include <float.h>
+
 #include "calc.h"
 #include "chartype.h"
 #include "strfun.h"
 
 #define EXPR_LEN 128 /* Maximum buffer size for expression input */
+#define MAX_DBL_CHARS (3 + DBL_MANT_DIG - DBL_MIN_EXP) /* Maximum chars needed to represent a double */
 
 /*
  * Display an input prompt.
  */
-int prompt() {
-    addstr("> ");
-    return getcurx(stdscr);
-}
-
-/*
- * Scroll the window upward to free up the given number of lines.
- */
-void scrolllines(int num) {
-    int i;
-    int origY = getcury(stdscr);
-    if (getcury(stdscr) + num <= LINES) {
-        return;
-    }
-
-    move(0, getcurx(stdscr));
-    for (i = 0; i < num; i++) {
-        deleteln();
-    }
-    move(origY - num, getcurx(stdscr));
+void prompt() {
+    printw("> ");
 }
 
 /*
@@ -61,7 +46,7 @@ int handle_input(int ch, int startIndex, int* length) {
     double result;
     int errorCode;
     char expr[EXPR_LEN];
-    char resultStr[EXPR_LEN];
+    char resultStr[MAX_DBL_CHARS];
 
     if (ch == KEY_LEFT) {
         if (getcurx(stdscr) > startIndex) {
@@ -82,30 +67,32 @@ int handle_input(int ch, int startIndex, int* length) {
             (*length)--;
         }
     } else if (ch == KEY_ENTER || ch == '\n') {
+        /* Read user's input from startIndex, then move back to the end of the input. */
         mvinnstr(getcury(stdscr), startIndex, expr, EXPR_LEN);
+        move(getcury(stdscr), startIndex + *length);
+
+        printw("\n");
         if (isQuit(expr)) {
             return 0;
         }
 
-        scrolllines(2);
         errorCode = Error_Success;
         result = calculate(trim(expr), &errorCode);
-        move(getcury(stdscr) + 1, 0);
         switch (errorCode) {
             case Error_Success:
                 format(result, resultStr);
-                insstr(resultStr);
+                printw("%s", resultStr);
                 break;
             case Error_UnbalParens:
-                insstr("Error: Unbalanced parentheses");
+                printw("Error: Unbalanced parentheses");
                 break;
             case Error_DivideByZero:
-                insstr("Error: Division by zero");
+                printw("Error: Division by zero");
                 break;
         }
 
         *length = 0;
-        move(getcury(stdscr) + 1, 0);
+        printw("\n");
         prompt();
     } else if (is_numeric(ch) || is_alpha(ch) || is_symbol(ch) || ch == ' ') {
         if (getcurx(stdscr) <= *length + 1) {
@@ -127,25 +114,28 @@ void copyright(char** copytext, int length) {
     int i;
 
     for (i = 0; i < length; i++) {
-        mvinsstr(i, 0, copytext[i]);
+        printw("%s\n", copytext[i]);
     }
 
-    move(length + 1, 0);
+    printw("\n");
 }
 
 void startui(char** copytext, int copylen) {
-    int startIndex;
-    int length = 0;
-    int running = 1;
+    int startIndex;  /* Index to begin reading input from (i.e. after the prompt) */
+    int length = 0;  /* Actual length of input. */
+    int running = 1; /* Indicates whether to continue processing user input, or exit. */
 
     /* Init ncurses */
     initscr();
     cbreak();
     noecho();
+    scrollok(stdscr, 1);
     keypad(stdscr, 1);
 
+    /* Print initial screen */
     copyright(copytext, copylen);
-    startIndex = prompt();
+    prompt();
+    startIndex = getcurx(stdscr);
 
     /* Main loop */
     while (running) {
