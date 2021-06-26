@@ -18,7 +18,7 @@
 int main() {
     int copylen = 4;
     char* copyright[4] = {
-        "Replicalc, Copyright (C) 2021 David Heinemann",
+        "Replicalc 0.1.0, Copyright (C) 2021 David Heinemann",
         "Replicalc comes with ABSOLUTELY NO WARRANTY.",
         "This is free software, and you are welcome to redistribute it",
         "under certain conditions. See the LICENSE file for details."

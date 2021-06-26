@@ -31,6 +31,10 @@ risk.
 
 Additional operators are forthcoming.
 
+## Windows Releases
+
+Pre-compiled Windows releases can be downloaded [here](https://dheinemann.com/files/replicalc/).
+
 ## Compiling
 
 Before proceeding, initialize all Git submodules if you haven't already done so:
