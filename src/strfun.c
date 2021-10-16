@@ -17,11 +17,13 @@
 #include <stdio.h>
 #include <string.h>
 
-char* trim(char* str) {
+char* trim(char* str)
+{
     int i;
 
     /* Trim start */
-    for (i = 0; (size_t) i < strlen(str); i++) {
+    for (i = 0; (size_t) i < strlen(str); i++)
+    {
         if (!isspace(str[i])) {
             break;
         }
@@ -29,7 +31,8 @@ char* trim(char* str) {
     }
 
     /* Trim end */
-    for (i = (int) strlen(str) - 1; i >= 0; i--) {
+    for (i = (int) strlen(str) - 1; i >= 0; i--)
+    {
         if (!isspace(str[i])) {
             break;
         }
@@ -39,15 +42,20 @@ char* trim(char* str) {
     return str;
 }
 
-void format(double value, char* output) {
+void format(double value, char* output)
+{
     int i;
 
     sprintf(output, "%f", value);
-    for (i = (int) strlen(output) - 1; i >= 0; i--) {
+    for (i = (int) strlen(output) - 1; i >= 0; i--)
+    {
         if (output[i] == '0') {
             output[i] = '\0';
-        } else {
-            if (output[i] == '.') {
+        }
+        else
+        {
+            if (output[i] == '.')
+            {
                 output[i] = '\0';
             }
             break;
@@ -55,7 +63,8 @@ void format(double value, char* output) {
     }
 }
 
-int isQuit(char* expr) {
+int isQuit(char* expr)
+{
     if (strcmp(trim(expr), "exit") == 0) { return 1; }
     if (strcmp(trim(expr), "quit") == 0) { return 1; }
     if (strcmp(trim(expr), "q")    == 0) { return 1; }

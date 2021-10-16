@@ -17,47 +17,48 @@
 #define STRSTACK_HEADER
 
 /*
- * Represents a string_stack of strings.
+ * Represents a StringStack of strings.
  */
-struct String_Stack {
+struct StringStack
+{
     int top;
     int capacity;
     char** array;
 };
 
 /*
- * Create a new string_stack.
+ * Create a new StringStack.
  */
-struct String_Stack* string_stack_new();
+struct StringStack* createStringStack();
 
 /*
- * De-allocate memory for a string_stack.
+ * De-allocate memory for a StringStack.
  */
-void string_stack_free(struct String_Stack* string_stack);
+void freeStringStack(struct StringStack* stringStack);
 
 /*
- * Test whether a string_stack is full.
+ * Test whether a StringStack is full.
  */
-int string_stack_isFull(struct String_Stack* string_stack);
+int stringStackIsFull(struct StringStack* stringStack);
 
 /*
- * Test whether a string_stack is empty.
+ * Test whether a StringStack is empty.
  */
-int string_stack_isEmpty(struct String_Stack* string_stack);
+int stringStackIsEmpty(struct StringStack* stringStack);
 
 /*
- * Push a string onto a string_stack.
+ * Push a string onto a StringStack.
  */
-void string_stack_push(struct String_Stack* string_stack, char* item);
+void pushStringStack(struct StringStack* stringStack, char* item);
 
 /*
- * Remove the top-most element from the string_stack.
+ * Remove the top-most element from the StringStack.
  */
-char* string_stack_pop(struct String_Stack* string_stack);
+char* popStringStack(struct StringStack* stringStack);
 
 /*
- * Get the top-most element from the string_stack.
+ * Get the top-most element from the StringStack.
  */
-char* string_stack_peek(struct String_Stack* string_stack);
+char* peekStringStack(struct StringStack* stringStack);
 
 #endif

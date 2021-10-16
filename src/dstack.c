@@ -18,48 +18,58 @@
 #include "limits.h"
 #include "dstack.h"
 
-struct Double_Stack* double_stack_new() {
-    struct Double_Stack* double_stack = (struct Double_Stack*) malloc(sizeof(struct Double_Stack));
-    double_stack->capacity = STACK_MAX_CAP;
-    double_stack->top = -1;
-    double_stack->array = (double*) malloc(sizeof(double[STACK_MAX_CAP]));
+struct DoubleStack* createDoubleStack()
+{
+    struct DoubleStack* doubleStack = (struct DoubleStack*) malloc(sizeof(struct DoubleStack));
+    doubleStack->capacity = STACK_MAX_CAP;
+    doubleStack->top = -1;
+    doubleStack->array = (double*) malloc(sizeof(double[STACK_MAX_CAP]));
 
-    return double_stack;
+    return doubleStack;
 }
 
-void double_stack_free(struct Double_Stack* double_stack) {
-    free(double_stack->array);
-    free(double_stack);
+void freeDoubleStack(struct DoubleStack* doubleStack)
+{
+    free(doubleStack->array);
+    free(doubleStack);
 }
 
-int double_stack_isFull(struct Double_Stack* double_stack) {
-    return double_stack->top == double_stack->capacity -1;
+int doubleStackIsFull(struct DoubleStack* doubleStack)
+{
+    return doubleStack->top == doubleStack->capacity -1;
 }
 
-int double_stack_isEmpty(struct Double_Stack* double_stack) {
-    return double_stack->top == -1;
+int doubleStackIsEmpty(struct DoubleStack* doubleStack)
+{
+    return doubleStack->top == -1;
 }
 
-void double_stack_push(struct Double_Stack* double_stack, double item) {
-    if (double_stack_isFull(double_stack)) {
+void pushDoubleStack(struct DoubleStack* doubleStack, double item)
+{
+    if (doubleStackIsFull(doubleStack))
+    {
         return;
     }
 
-    double_stack->array[++double_stack->top] = item;
+    doubleStack->array[++doubleStack->top] = item;
 }
 
-double double_stack_pop(struct Double_Stack* double_stack) {
-    if (double_stack_isEmpty(double_stack)) {
+double popDoubleStack(struct DoubleStack* doubleStack)
+{
+    if (doubleStackIsEmpty(doubleStack))
+    {
         return -1; /* todo */
     }
 
-    return double_stack->array[double_stack->top--];
+    return doubleStack->array[doubleStack->top--];
 }
 
-double double_stack_peek(struct Double_Stack* double_stack) {
-    if (double_stack_isEmpty(double_stack)) {
+double peekDoubleStack(struct DoubleStack* doubleStack)
+{
+    if (doubleStackIsEmpty(doubleStack))
+    {
         return -1; /* todo */
     }
 
-    return double_stack->array[double_stack->top];
+    return doubleStack->array[doubleStack->top];
 }

@@ -19,45 +19,46 @@
 /*
  * Represents a stack of doubles.
  */
-struct Double_Stack {
+struct DoubleStack
+{
     int top;
     int capacity;
     double* array;
 };
 
 /*
- * Create a new double_stack.
+ * Create a new doubleStack.
  */
-struct Double_Stack* double_stack_new();
+struct DoubleStack* createDoubleStack();
 
 /*
- * De-allocate memory for a double_stack.
+ * De-allocate memory for a doubleStack.
  */
-void double_stack_free(struct Double_Stack* double_stack);
+void freeDoubleStack(struct DoubleStack* doubleStack);
 
 /*
- * Test whether a double_stack is full.
+ * Test whether a doubleStack is full.
  */
-int double_stack_isFull(struct Double_Stack* double_stack);
+int doubleStackIsFull(struct DoubleStack* doubleStack);
 
 /*
- * Test whether a double_stack is empty.
+ * Test whether a doubleStack is empty.
  */
-int double_stack_isEmpty(struct Double_Stack* double_stack);
+int doubleStackIsEmpty(struct DoubleStack* doubleStack);
 
 /*
- * Push a string onto a double_stack.
+ * Push a string onto a doubleStack.
  */
-void double_stack_push(struct Double_Stack* double_stack, double item);
+void pushDoubleStack(struct DoubleStack* doubleStack, double item);
 
 /*
- * Remove the top-most element from the double_stack.
+ * Remove the top-most element from the doubleStack.
  */
-double double_stack_pop(struct Double_Stack* double_stack);
+double popDoubleStack(struct DoubleStack* doubleStack);
 
 /*
- * Get the top-most element from the double_stack.
+ * Get the top-most element from the doubleStack.
  */
-double double_stack_peek(struct Double_Stack* double_stack);
+double peekDoubleStack(struct DoubleStack* doubleStack);
 
 #endif

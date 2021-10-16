@@ -15,7 +15,8 @@
 
 #include "cursesui.h"
 
-int main() {
+int main()
+{
     int copylen = 4;
     char* copyright[4] = {
         "Replicalc 0.1.0, Copyright (C) 2021 David Heinemann",
@@ -24,6 +25,6 @@ int main() {
         "under certain conditions. See the LICENSE file for details."
     };
 
-    startui(copyright, copylen);
+    startUserInterface(copyright, copylen);
     return 0;
 }

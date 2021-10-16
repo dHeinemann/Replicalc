@@ -19,6 +19,6 @@
 /*
  * Start the user interface.
  */
-void startui(char** copytext, int copylen);
+void startUserInterface(char** copytext, int copylen);
 
 #endif

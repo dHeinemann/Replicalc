@@ -13,18 +13,21 @@
  * GNU General Public License for more details.
  */
 
-int is_numeric(char c) {
+int isNumeric(char c)
+{
     return (c >= 48 && c <= 57) /* 0-9 */
         || c == '.'
         || c == ',';
 }
 
-int is_alpha(char c) {
+int isLetter(char c)
+{
     return (c >= 65 && c <= 90)
         || (c >= 97 && c <= 122);
 }
 
-int is_symbol(char c) {
+int isSymbol(char c)
+{
     return c == '^'
         || c == '/'
         || c == '*'

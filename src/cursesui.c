@@ -31,7 +31,8 @@
 /*
  * Display an input prompt.
  */
-void prompt() {
+void prompt()
+{
     printw("> ");
 }
 
@@ -42,43 +43,59 @@ void prompt() {
  * startIndex: Column at which text input begins.
  * length: Maximum length of text input.
  */
-int handle_input(int ch, int startIndex, int* length) {
+int handleInput(int ch, int startIndex, int* length)
+{
     double result;
     int errorCode;
     char expr[EXPR_LEN];
     char resultStr[MAX_DBL_CHARS];
 
-    if (ch == KEY_LEFT) {
-        if (getcurx(stdscr) > startIndex) {
+    if (ch == KEY_LEFT)
+    {
+        if (getcurx(stdscr) > startIndex)
+        {
             move(getcury(stdscr), getcurx(stdscr) - 1);
         }
-    } else if (ch == KEY_RIGHT) {
-        if (getcurx(stdscr) <= *length + 1) {
+    }
+    else if (ch == KEY_RIGHT)
+    {
+        if (getcurx(stdscr) <= *length + 1)
+        {
             move(getcury(stdscr), getcurx(stdscr) + 1);
         }
-    } else if (ch == KEY_BACKSPACE || ch == 127 || ch == '\b') {
-        if (getcurx(stdscr) > startIndex) {
+    }
+    else if (ch == KEY_BACKSPACE || ch == 127 || ch == '\b')
+    {
+        if (getcurx(stdscr) > startIndex)
+        {
             mvdelch(getcury(stdscr), getcurx(stdscr) - 1);
             (*length)--;
         }
-    } else if (ch == KEY_DC) {
-        if (getcurx(stdscr) <= *length + 1) {
+    }
+    else if (ch == KEY_DC)
+    {
+        if (getcurx(stdscr) <= *length + 1)
+        {
             delch();
             (*length)--;
         }
-    } else if (ch == KEY_ENTER || ch == '\n') {
+    }
+    else if (ch == KEY_ENTER || ch == '\n')
+    {
         /* Read user's input from startIndex, then move back to the end of the input. */
         mvinnstr(getcury(stdscr), startIndex, expr, EXPR_LEN);
         move(getcury(stdscr), startIndex + *length);
 
         printw("\n");
-        if (isQuit(expr)) {
+        if (isQuit(expr))
+        {
             return 0;
         }
 
         errorCode = Error_Success;
         result = calculate(trim(expr), &errorCode);
-        switch (errorCode) {
+        switch (errorCode)
+        {
             case Error_Success:
                 format(result, resultStr);
                 printw("%s", resultStr);
@@ -94,11 +111,16 @@ int handle_input(int ch, int startIndex, int* length) {
         *length = 0;
         printw("\n");
         prompt();
-    } else if (is_numeric(ch) || is_alpha(ch) || is_symbol(ch) || ch == ' ') {
-        if (getcurx(stdscr) <= *length + 1) {
+    }
+    else if (isNumeric(ch) || isLetter(ch) || isSymbol(ch) || ch == ' ')
+    {
+        if (getcurx(stdscr) <= *length + 1)
+        {
             insch(ch);
             move(getcury(stdscr), getcurx(stdscr) + 1);
-        } else {
+        }
+        else
+        {
             addch(ch);
         }
         (*length)++;
@@ -110,17 +132,20 @@ int handle_input(int ch, int startIndex, int* length) {
 /*
  * Show copyright disclaimer.
  */
-void copyright(char** copytext, int length) {
+void showCopyright(char** copytext, int length)
+{
     int i;
 
-    for (i = 0; i < length; i++) {
+    for (i = 0; i < length; i++)
+    {
         printw("%s\n", copytext[i]);
     }
 
     printw("\n");
 }
 
-void startui(char** copytext, int copylen) {
+void startUserInterface(char** copytext, int copylen)
+{
     int startIndex;  /* Index to begin reading input from (i.e. after the prompt) */
     int length = 0;  /* Actual length of input. */
     int running = 1; /* Indicates whether to continue processing user input, or exit. */
@@ -133,13 +158,14 @@ void startui(char** copytext, int copylen) {
     keypad(stdscr, 1);
 
     /* Print initial screen */
-    copyright(copytext, copylen);
+    showCopyright(copytext, copylen);
     prompt();
     startIndex = getcurx(stdscr);
 
     /* Main loop */
-    while (running) {
-        running = handle_input(getch(), startIndex, &length);
+    while (running)
+    {
+        running = handleInput(getch(), startIndex, &length);
     }
 
     endwin();

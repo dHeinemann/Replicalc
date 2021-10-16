@@ -19,16 +19,16 @@
 /*
  * Test whether a character is numeric.
  */
-int is_numeric(char c);
+int isNumeric(char c);
 
 /*
  * Test whether a character is a letter.
  */
-int is_alpha(char c);
+int isLetter(char c);
 
 /*
  * Test whether a character is a symbol.
  */
-int is_symbol(char c);
+int isSymbol(char c);
 
 #endif

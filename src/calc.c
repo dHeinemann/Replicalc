@@ -35,7 +35,8 @@
 /*
  * Test whether a string is a math operator.
  */
-int is_op(char* token) {
+int isOperator(char* token)
+{
     if (!token)
         return 0;
 
@@ -49,7 +50,8 @@ int is_op(char* token) {
 /*
  * Get a token's precedence.
  */
-int prec(char* token) {
+int getPrecedence(char* token)
+{
     if (strcmp(token, "^") == 0) { return 10; }
     if (strcmp(token, "/") == 0) { return  5; }
     if (strcmp(token, "*") == 0) { return  5; }
@@ -61,8 +63,10 @@ int prec(char* token) {
 /*
  * Get a token's associativity.
  */
-int assoc(char* token) {
-    if (strcmp(token, "^") == 0) {
+int getAssociativity(char* token)
+{
+    if (strcmp(token, "^") == 0)
+    {
         return ASSOC_RIGHT;
     }
 
@@ -72,24 +76,28 @@ int assoc(char* token) {
 /*
  * Check whether the character at i is the negative sign for the number that follows.
  */
-int is_negative(char expr[], int i) {
+int isNegative(char expr[], int i)
+{
     int nextCharIsNum; /* Negative sign is to the immediate left of the number that follows. */
     int lastCharIsSymbol;
     int lastCharIsSpace;
-    if (expr[i] != '-') {
+    if (expr[i] != '-')
+    {
         return 0;
     }
 
     /* Expression begins with a negative number */
-    nextCharIsNum = (size_t) i < strlen(expr) && is_numeric(expr[i+1]);
-    if (i == 0 && nextCharIsNum) {
+    nextCharIsNum = (size_t) i < strlen(expr) && isNumeric(expr[i+1]);
+    if (i == 0 && nextCharIsNum)
+    {
         return 1;
     }
 
     /* Negative sign belongs to a number */
-    lastCharIsSymbol = is_symbol(expr[i-1]);
+    lastCharIsSymbol = isSymbol(expr[i-1]);
     lastCharIsSpace = expr[i-1] == ' ';
-    if (nextCharIsNum && (lastCharIsSymbol || lastCharIsSpace)) {
+    if (nextCharIsNum && (lastCharIsSymbol || lastCharIsSpace))
+    {
         return 1;
     }
 
@@ -99,7 +107,8 @@ int is_negative(char expr[], int i) {
 /*
  * Convert an expression into a series of tokens.
  */
-int tokenize(char expr[], char** tokens) {
+int tokenize(char expr[], char** tokens)
+{
     int i;
     int element;
     int index;
@@ -110,26 +119,35 @@ int tokenize(char expr[], char** tokens) {
     index = 0;
     lastType = -1;
 
-    for (i = 0; (size_t) i < strlen(expr); i++) {
+    for (i = 0; (size_t) i < strlen(expr); i++)
+    {
         empty = index == 0 && element == 0;
-        if (is_numeric(expr[i]) || is_negative(expr, i)) {
-            if (!empty && lastType != TYPE_DIGIT) {
+        if (isNumeric(expr[i]) || isNegative(expr, i))
+        {
+            if (!empty && lastType != TYPE_DIGIT)
+            {
                 tokens[index++][element] = '\0';
                 element = 0;
             }
 
             tokens[index][element++] = expr[i];
             lastType = TYPE_DIGIT;
-        } else if (is_symbol(expr[i])) {
-            if (!empty) {
+        }
+        else if (isSymbol(expr[i]))
+        {
+            if (!empty)
+            {
                 tokens[index++][element] = '\0';
                 element = 0;
             }
 
             tokens[index][element++] = expr[i];
             lastType = TYPE_OP;
-        } else if (is_alpha(expr[i])) {
-            if (!empty && lastType != TYPE_ALPHA) {
+        }
+        else if (isLetter(expr[i]))
+        {
+            if (!empty && lastType != TYPE_ALPHA)
+            {
                 tokens[index++][element] = '\0';
                 element = 0;
             }
@@ -147,93 +165,122 @@ int tokenize(char expr[], char** tokens) {
 /*
  * Convert an infix expression to postfix.
  */
-int infixToPostfix(char** tokens, int length, char** output) {
+int infixToPostfix(char** tokens, int length, char** output)
+{
     int i;
     char* op1;
     char* op2;
-    struct String_Stack* ops = string_stack_new();
+    struct StringStack* ops = createStringStack();
     int outputIndex = 0;
 
-    for (i = 0; i < length; i++) {
-        if (is_op(tokens[i])) {
+    for (i = 0; i < length; i++)
+    {
+        if (isOperator(tokens[i]))
+        {
             op1 = tokens[i];
-            while (is_op(string_stack_peek(ops))) {
-                op2 = string_stack_peek(ops);
-                if ((assoc(op1) == ASSOC_LEFT && prec(op1) <= prec(op2))
-                    || (assoc(op1) == ASSOC_RIGHT && prec(op1) < prec(op2))) {
-                        strcpy(output[outputIndex++], string_stack_pop(ops));
-                } else {
+            while (isOperator(peekStringStack(ops)))
+            {
+                op2 = peekStringStack(ops);
+                if ((getAssociativity(op1) == ASSOC_LEFT && getPrecedence(op1) <= getPrecedence(op2))
+                    || (getAssociativity(op1) == ASSOC_RIGHT && getPrecedence(op1) < getPrecedence(op2)))
+                {
+                    strcpy(output[outputIndex++], popStringStack(ops));
+                }
+                else
+                {
                     break;
                 }
             }
-            string_stack_push(ops, op1);
-        } else if (strcmp(tokens[i], "(") == 0) {
-            string_stack_push(ops, tokens[i]);
-        } else if (strcmp(tokens[i], ")") == 0) {
-            while (strcmp(string_stack_peek(ops), "(") != 0) {
-                strcpy(output[outputIndex++], string_stack_pop(ops));
+            pushStringStack(ops, op1);
+        }
+        else if (strcmp(tokens[i], "(") == 0)
+        {
+            pushStringStack(ops, tokens[i]);
+        }
+        else if (strcmp(tokens[i], ")") == 0)
+        {
+            while (strcmp(peekStringStack(ops), "(") != 0)
+            {
+                strcpy(output[outputIndex++], popStringStack(ops));
             }
-            string_stack_pop(ops); /* Discard left paren */
-        } else {
+            popStringStack(ops); /* Discard left paren */
+        }
+        else
+        {
             strcpy(output[outputIndex++], tokens[i]);
         }
     }
 
-    while (!string_stack_isEmpty(ops)) {
-        strcpy(output[outputIndex++], string_stack_pop(ops));
+    while (!stringStackIsEmpty(ops))
+    {
+        strcpy(output[outputIndex++], popStringStack(ops));
     }
     
-    string_stack_free(ops);
+    freeStringStack(ops);
     return outputIndex;
 }
 
 /*
  * Evaluate a postfix expression and return the result.
  */
-double evaluate(char** tokens, int numTokens, int* errorCode) {
+double evaluate(char** tokens, int numTokens, int* errorCode)
+{
     int i;
     double result;
 
-    struct Double_Stack* stack = double_stack_new();
-    for (i = 0; i < numTokens; i++) {
-        if (is_op(tokens[i])) {
-            double op2 = double_stack_pop(stack);
-            double op1 = double_stack_pop(stack);
+    struct DoubleStack* stack = createDoubleStack();
+    for (i = 0; i < numTokens; i++)
+    {
+        if (isOperator(tokens[i]))
+        {
+            double op2 = popDoubleStack(stack);
+            double op1 = popDoubleStack(stack);
             if (strcmp(tokens[i], "/") == 0) {
-                if (op2 == 0) {
+                if (op2 == 0)
+                {
                     *errorCode = Error_DivideByZero;
-                    double_stack_free(stack);
+                    freeDoubleStack(stack);
                     return 0;
                 }
-                double_stack_push(stack, (op1 / op2));
+                pushDoubleStack(stack, (op1 / op2));
             }
-            if (strcmp(tokens[i], "*") == 0) { double_stack_push(stack, (op1 * op2)); }
-            if (strcmp(tokens[i], "+") == 0) { double_stack_push(stack, (op1 + op2)); }
-            if (strcmp(tokens[i], "-") == 0) { double_stack_push(stack, (op1 - op2)); }
-            if (strcmp(tokens[i], "^") == 0) { double_stack_push(stack, pow(op1, op2)); }
-        } else {
-            double_stack_push(stack, strtod(tokens[i], NULL));
+            if (strcmp(tokens[i], "*") == 0) { pushDoubleStack(stack, (op1 * op2)); }
+            if (strcmp(tokens[i], "+") == 0) { pushDoubleStack(stack, (op1 + op2)); }
+            if (strcmp(tokens[i], "-") == 0) { pushDoubleStack(stack, (op1 - op2)); }
+            if (strcmp(tokens[i], "^") == 0) { pushDoubleStack(stack, pow(op1, op2)); }
+        }
+        else
+        {
+            pushDoubleStack(stack, strtod(tokens[i], NULL));
         }
     }
 
-    result = double_stack_pop(stack);
-    double_stack_free(stack);
+    result = popDoubleStack(stack);
+    freeDoubleStack(stack);
     return result;
 }
 
 /*
  * Check whether an expression has balanced parentheses.
  */
-int hasBalancedParens(char* expr) {
+int hasBalancedParentheses(char* expr)
+{
     int i;
     int numParens = 0;
-    for (i = 0; (size_t) i < strlen(expr); i++) {
-        if (expr[i] == '(') {
+    for (i = 0; (size_t) i < strlen(expr); i++)
+    {
+        if (expr[i] == '(')
+        {
             numParens++;
-        } else if (expr[i] == ')') {
-            if (numParens > 0) {
+        }
+        else if (expr[i] == ')')
+        {
+            if (numParens > 0)
+            {
                 numParens--;
-            } else {
+            }
+            else
+            {
                 return 0;
             }
         }
@@ -242,7 +289,8 @@ int hasBalancedParens(char* expr) {
     return numParens == 0;
 }
 
-double calculate(char* expr, int* errorCode) {
+double calculate(char* expr, int* errorCode)
+{
     double result;
     int i;
 
@@ -251,7 +299,8 @@ double calculate(char* expr, int* errorCode) {
     char** postfixtokens;
     int numpostfixtokens;
 
-    if (!hasBalancedParens(expr)) {
+    if (!hasBalancedParentheses(expr))
+    {
         *errorCode = Error_UnbalParens;
         return 0;
     }
@@ -260,20 +309,24 @@ double calculate(char* expr, int* errorCode) {
         return 0;
 
     infixtokens = (char**) malloc(sizeof(char[ARRAY_MAX_ELEM][TOKEN_LEN]));
-    for (i = 0; (size_t) i < strlen(expr); i++) {
+    for (i = 0; (size_t) i < strlen(expr); i++)
+    {
         infixtokens[i] = (char*) malloc(sizeof(char[TOKEN_LEN]));
     }
     numinfixtokens = tokenize(expr, infixtokens);
 
     postfixtokens = (char**) malloc(sizeof(char[ARRAY_MAX_ELEM][TOKEN_LEN]));
-    for (i = 0; (size_t) i < strlen(expr); i++) {
+    for (i = 0; (size_t) i < strlen(expr); i++)
+    {
         postfixtokens[i] = (char*) malloc(sizeof(char[TOKEN_LEN]));
     }
     numpostfixtokens = infixToPostfix(infixtokens, numinfixtokens, postfixtokens);
     result = evaluate(postfixtokens, numpostfixtokens, errorCode);
 
-    for (i = 0; (size_t) i < strlen(expr); i++) {
-        if (infixtokens[i]) {
+    for (i = 0; (size_t) i < strlen(expr); i++)
+    {
+        if (infixtokens[i])
+        {
             free(infixtokens[i]);
             free(postfixtokens[i]);
         }

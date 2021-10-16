@@ -18,48 +18,58 @@
 #include "limits.h"
 #include "strstack.h"
 
-struct String_Stack* string_stack_new() {
-    struct String_Stack* string_stack = (struct String_Stack*) malloc(sizeof(struct String_Stack));
-    string_stack->capacity = STACK_MAX_CAP;
-    string_stack->top = -1;
-    string_stack->array = (char**) malloc(sizeof(char[STACK_MAX_CAP]));
+struct StringStack* createStringStack()
+{
+    struct StringStack* StringStack = (struct StringStack*) malloc(sizeof(struct StringStack));
+    StringStack->capacity = STACK_MAX_CAP;
+    StringStack->top = -1;
+    StringStack->array = (char**) malloc(sizeof(char[STACK_MAX_CAP]));
 
-    return string_stack;
+    return StringStack;
 }
 
-void string_stack_free(struct String_Stack* string_stack) {
-    free(string_stack->array);
-    free(string_stack);
+void freeStringStack(struct StringStack* stringStack)
+{
+    free(stringStack->array);
+    free(stringStack);
 }
 
-int string_stack_isFull(struct String_Stack* string_stack) {
-    return string_stack->top == string_stack->capacity -1;
+int stringStackIsFull(struct StringStack* stringStack)
+{
+    return stringStack->top == stringStack->capacity -1;
 }
 
-int string_stack_isEmpty(struct String_Stack* string_stack) {
-    return string_stack->top == -1;
+int stringStackIsEmpty(struct StringStack* stringStack)
+{
+    return stringStack->top == -1;
 }
 
-void string_stack_push(struct String_Stack* string_stack, char* item) {
-    if (string_stack_isFull(string_stack)) {
+void pushStringStack(struct StringStack* stringStack, char* item)
+{
+    if (stringStackIsFull(stringStack))
+    {
         return;
     }
 
-    string_stack->array[++string_stack->top] = item;
+    stringStack->array[++stringStack->top] = item;
 }
 
-char* string_stack_pop(struct String_Stack* string_stack) {
-    if (string_stack_isEmpty(string_stack)) {
+char* popStringStack(struct StringStack* stringStack)
+{
+    if (stringStackIsEmpty(stringStack))
+    {
         return NULL;
     }
 
-    return string_stack->array[string_stack->top--];
+    return stringStack->array[stringStack->top--];
 }
 
-char* string_stack_peek(struct String_Stack* string_stack) {
-    if (string_stack_isEmpty(string_stack)) {
+char* peekStringStack(struct StringStack* stringStack)
+{
+    if (stringStackIsEmpty(stringStack))
+    {
         return NULL;
     }
 
-    return string_stack->array[string_stack->top];
+    return stringStack->array[stringStack->top];
 }
