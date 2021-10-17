@@ -4,18 +4,7 @@ Replicalc is a simple keyboard-driven calculator for Linux, Windows, and MS-DOS.
 Expressions are evaluated inside a REPL, similar to the classic TI-83
 calculator.
 
-**"Screenshot":**
-
-```
-Replicalc, Copyright (C) 2021 David Heinemann
-Replicalc comes with ABSOLUTELY NO WARRANTY.
-This is free software, and you are welcome to redistribute it
-under certain conditions. See the LICENSE file for details.
-
-> 10 * (2 + 3) / 2
-25
->
-```
+![](screenshot.png)
 
 ## Status
 
@@ -23,13 +12,19 @@ This is a hobby project to learn the C programming language. The code is bad
 and will contain bugs; it can be considered an early alpha. Run at your own
 risk.
 
-## Supported Operators
+## Features
+
+**Operators**
 
 * Addition (`+`), Subtraction (`-`), Multiplication (`*`), Division (`/`)
 * Exponents (`^`)
 * Parenthesis (`(`, `)`)
 
 Additional operators are forthcoming.
+
+**History**
+
+Use the Up and Down keys to switch between expressions previously entered within the same session.
 
 ## Windows Releases
 

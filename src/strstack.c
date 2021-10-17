@@ -58,7 +58,7 @@ char* popStringStack(struct StringStack* stringStack)
 {
     if (stringStackIsEmpty(stringStack))
     {
-        return NULL;
+        return "";
     }
 
     return stringStack->array[stringStack->top--];

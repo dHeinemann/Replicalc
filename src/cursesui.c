@@ -20,12 +20,15 @@
 #endif
 
 #include <float.h>
+#include <stdlib.h>
+#include <string.h>
 
 #include "calc.h"
 #include "chartype.h"
+#include "history.h"
+#include "limits.h"
 #include "strfun.h"
 
-#define EXPR_LEN 128 /* Maximum buffer size for expression input */
 #define MAX_DBL_CHARS (3 + DBL_MANT_DIG - DBL_MIN_EXP) /* Maximum chars needed to represent a double */
 
 /*
@@ -37,11 +40,41 @@ void prompt()
 }
 
 /*
+ * Restore text from a buffer to the console.
+ *
+ * @param historyBuffer Buffer to restore from.
+ * @param startIndex Console index to begin writing from.
+ * @param length Length of current input on the console.
+ */
+void restoreFromBuffer(char historyBuffer[], int startIndex, int* length)
+{
+    int difference;
+    int i;
+
+    difference = *length > (int) strlen(historyBuffer)
+        ? *length - strlen(historyBuffer)
+        : 0;
+
+    move(getcury(stdscr), startIndex);
+    printw(historyBuffer);
+    *length = (int) strlen(historyBuffer);
+
+    if (difference > 0)
+        for (i = 0; i < difference; i++)
+            printw(" ");
+
+    move(getcury(stdscr), startIndex + strlen(historyBuffer));
+}
+
+static struct History* history;
+
+/**
  * Handle ncurses keyboard input.
  *
- * ch: Button pressed.
- * startIndex: Column at which text input begins.
- * length: Maximum length of text input.
+ * @param ch Button pressed.
+ * @param startIndex Column at which text input begins.
+ * @param length Maximum length of text input.
+ * @param isExtended Indicates whether button pressed was an Extended button.
  */
 int handleInput(int ch, int startIndex, int* length)
 {
@@ -49,6 +82,7 @@ int handleInput(int ch, int startIndex, int* length)
     int errorCode;
     char expr[EXPR_LEN];
     char resultStr[MAX_DBL_CHARS];
+    char historyBuffer[EXPR_LEN];
 
     if (ch == KEY_LEFT)
     {
@@ -70,6 +104,20 @@ int handleInput(int ch, int startIndex, int* length)
         {
             mvdelch(getcury(stdscr), getcurx(stdscr) - 1);
             (*length)--;
+        }
+    }
+    else if (ch == KEY_UP)
+    {
+        if (previousExpression(history, historyBuffer))
+        {
+            restoreFromBuffer(historyBuffer, startIndex, length);
+        }
+    }
+    else if (ch == KEY_DOWN)
+    {
+        if (nextExpression(history, historyBuffer))
+        {
+            restoreFromBuffer(historyBuffer, startIndex, length);
         }
     }
     else if (ch == KEY_DC)
@@ -107,6 +155,8 @@ int handleInput(int ch, int startIndex, int* length)
                 printw("Error: Division by zero");
                 break;
         }
+
+        addToHistory(history, expr);
 
         *length = 0;
         printw("\n");
@@ -150,6 +200,8 @@ void startUserInterface(char** copytext, int copylen)
     int length = 0;  /* Actual length of input. */
     int running = 1; /* Indicates whether to continue processing user input, or exit. */
 
+    history = createHistory(history);
+
     /* Init ncurses */
     initscr();
     cbreak();
@@ -169,4 +221,6 @@ void startUserInterface(char** copytext, int copylen)
     }
 
     endwin();
+
+    destroyHistory(history);
 }

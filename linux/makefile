@@ -14,7 +14,7 @@ rcalc: cursesui.o
 run: rcalc
 	./rcalc
 
-cursesui.o: calc.o chartype.o strfun.o
+cursesui.o: calc.o chartype.o strfun.o history.o
 	$(CC) $(FLAGS) -c ../src/cursesui.c -o cursesui.o
 
 calc.o: chartype.o dstack.o strstack.o
@@ -31,6 +31,9 @@ dstack.o:
 
 strstack.o:
 	$(CC) $(FLAGS) -c ../src/strstack.c -o strstack.o
+
+history.o:
+	$(CC) $(FLAGS) -c ../src/history.c -o history.o
 
 debug: rcalc
 

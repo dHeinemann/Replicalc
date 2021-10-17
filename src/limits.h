@@ -19,6 +19,6 @@
 #define TOKEN_LEN 20        /* Maximum num characters in a token */
 #define ARRAY_MAX_ELEM 128  /* Maximum num elements in an array */
 #define STACK_MAX_CAP 128   /* Maximum num elements in a stack */
-#define EXPR_MAX_WIDTH 1024 /* Maximum num characters in an expression */
+#define EXPR_LEN 128        /* Maximum buffer size for expression input */
 
 #endif

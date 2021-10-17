@@ -10,7 +10,7 @@ rcalc: cursesui.o
 run: rcalc
 	rcalc.exe
 
-cursesui.o: calc.o chartype.o strfun.o pdcurses
+cursesui.o: calc.o chartype.o strfun.o history.o pdcurses
 	$(CC) ..\src\cursesui.c -fo=cursesui.o $(CFLAGS) -i="..\pdcurses"
 
 calc.o: chartype.o dstack.o strstack.o
@@ -28,6 +28,9 @@ dstack.o:
 strstack.o:
 	$(CC) ..\src\strstack.c -fo=strstack.o $(CFLAGS)
 
+history.o:
+	$(CC) ..\src\history.c -fo=history.o $(CFLAGS)
+
 .NOCHECK
 pdcurses:
 	cd $(PDCURSES)
@@ -38,5 +41,7 @@ clean:
 	rm *.o
 	rm *.exe
 	rm *.err
+
+cleancurses:
 	rm $(PDCURSES)\*.obj
 	rm $(PDCURSES)\*.lib
