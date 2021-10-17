@@ -256,6 +256,9 @@ double calculate(char* expr, int* errorCode) {
         return 0;
     }
 
+    if ((int) strlen(expr) == 0)
+        return 0;
+
     infixtokens = (char**) malloc(sizeof(char[ARRAY_MAX_ELEM][TOKEN_LEN]));
     for (i = 0; (size_t) i < strlen(expr); i++) {
         infixtokens[i] = (char*) malloc(sizeof(char[TOKEN_LEN]));
