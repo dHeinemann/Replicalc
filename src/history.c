@@ -19,6 +19,7 @@
 #include "history.h"
 #include "limits.h"
 #include "strstack.h"
+#include "strfun.h"
 
 struct History* createHistory()
 {
@@ -59,7 +60,7 @@ int previousExpression(struct History* history, char* buffer)
     history->current = popStringStack(history->older);
 
     if (buffer != NULL)
-        strncpy(buffer, history->current, EXPR_LEN);
+        copyString(buffer, history->current, EXPR_LEN);
 
     return 1;
 }
@@ -69,13 +70,14 @@ int nextExpression(struct History* history, char buffer[])
     if (stringStackIsEmpty(history->newer))
         return 0;
 
+    /* todo: using this with the last expression produces garbled text on DOS */
     if (history->current != NULL)
         pushStringStack(history->older, history->current);
 
     history->current = popStringStack(history->newer);
 
     if (buffer != NULL)
-        strncpy(buffer, history->current, EXPR_LEN);
+        copyString(buffer, history->current, EXPR_LEN);
 
     return 1;
 }
@@ -103,6 +105,6 @@ void addToHistory(struct History* history, char expression[])
     }
 
     exp = malloc(sizeof(char) * EXPR_LEN);
-    strncpy(exp, expression, EXPR_LEN);
+    copyString(exp, expression, EXPR_LEN);
     pushStringStack(history->older, exp);
 }

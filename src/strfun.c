@@ -70,3 +70,27 @@ int isQuit(char* expr)
     if (strcmp(trim(expr), "q")    == 0) { return 1; }
     return 0;
 }
+
+/**
+ * Safely copy the first num characters of source to destination, up to the first NULL character. If source is longer
+ * than num, the final character of destination will be set to NULL (guaranteeing a NULL-terminated C string).
+ * 
+ * @param destination Destination buffer.
+ * @param source Source buffer.
+ * @param num Maximum number of characters to copy.
+ */
+void copyString(char destination[], char source[], int num)
+{
+    int i;
+
+    for (i = 0; i < num; i++)
+    {
+        if (i < num - 1)
+            destination[i] = source[i];
+        else
+            destination[i] = '\0'; /* guarantee string is NULL-terminated */
+
+        if (source[i] == '\0')
+            break; /* stop after NULL */
+    }
+}

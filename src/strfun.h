@@ -31,4 +31,14 @@ void format(double value, char* output);
  */
 int isQuit(char* expr);
 
+/**
+ * Safely copy the first num characters of source to destination, up to the first NULL character. If source is longer
+ * than num, the final character of destination will be set to NULL (guaranteeing a NULL-terminated C string).
+ * 
+ * @param destination Destination buffer.
+ * @param source Source buffer.
+ * @param num Maximum number of characters to copy.
+ */
+void copyString(char destination[], char source[], int num);
+
 #endif
