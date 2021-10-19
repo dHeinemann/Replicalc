@@ -90,9 +90,17 @@ void resetHistory(struct History* history)
 
 void addToHistory(struct History* history, char expression[])
 {
+    int isSameAsLastExpression;
     char* exp;
 
     resetHistory(history);
+
+    if (!stringStackIsEmpty(history->older))
+    {
+        isSameAsLastExpression = strncmp(expression, peekStringStack(history->older), EXPR_LEN) == 0;
+        if (isSameAsLastExpression)
+            return;
+    }
 
     exp = malloc(sizeof(char) * EXPR_LEN);
     strncpy(exp, expression, EXPR_LEN);
