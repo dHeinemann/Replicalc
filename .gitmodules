@@ -1,8 +1,0 @@
-[submodule "Unity"]
-	path = Unity
-	url = https://github.com/ThrowTheSwitch/Unity.git
-	ignore = dirty
-[submodule "PDCurses"]
-	path = PDCurses
-	url = https://github.com/wmcbrine/PDCurses.git
-	ignore = dirty
