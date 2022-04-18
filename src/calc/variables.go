@@ -13,27 +13,26 @@
  * GNU General Public License for more details.
  */
 
-package chartype
+package calc
 
-// Test whether the given character is numeric.
-func IsNumeric(c byte) bool {
-	return (c >= 48 && c <= 57) /* 0-9 */ ||
-		c == '.' ||
-		c == ','
+var variables map[string]float64
+
+var variablesInitialized bool = false
+
+func InitializeVariables() {
+	variables = make(map[string]float64)
+	variablesInitialized = true
 }
 
-// Test whether the givencharacter is a letter.
-func IsLetter(c byte) bool {
-	return (c >= 65 && c <= 90) ||
-		(c >= 97 && c <= 122)
+func VarExists(key string) bool {
+	_, ok := variables[key]
+	return ok
 }
 
-// Tets whether the given character is a symbol.
-func IsSymbol(c byte) bool {
-	return c == '^' ||
-		c == '/' ||
-		c == '*' ||
-		c == '+' ||
-		c == '-' ||
-		c == '(' || c == ')'
+func GetVar(key string) float64 {
+	return variables[key]
+}
+
+func SetVar(key string, value float64) {
+	variables[key] = value
 }

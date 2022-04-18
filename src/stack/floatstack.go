@@ -24,12 +24,12 @@ func (fs *FloatStack) IsEmpty() bool {
 	return len((*fs).array) == 0
 }
 
-// Push a float64 onto the stack.
+// Push a value onto the stack.
 func (fs *FloatStack) Push(s float64) {
 	(*fs).array = append((*fs).array, s)
 }
 
-// Pop a float64 from the stack.
+// Pop a value from the stack.
 func (fs *FloatStack) Pop() (result float64, ok bool) {
 	if (*fs).IsEmpty() {
 		return 0.0, false
@@ -46,7 +46,7 @@ func (fs *FloatStack) Pop() (result float64, ok bool) {
 	return topValue, true
 }
 
-// Get the top-most element from the FloatStack
+// Get the top-most value from the FloatStack
 func (fs *FloatStack) Peek() (result float64, ok bool) {
 	if (*fs).IsEmpty() {
 		return 0.0, false
