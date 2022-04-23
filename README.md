@@ -15,7 +15,7 @@ alpha. Run at your own risk.
 
 **Operators**
 
-* Addition (`+`), Subtraction (`-`), Multiplication (`*`), Division (`/`)
+* Addition (`+`), Subtraction (`-`), Multiplication (`*`), Division (`/`), Modulo (`%`)
 * Exponents (`^`)
 * Parenthesis (`(`, `)`)
 

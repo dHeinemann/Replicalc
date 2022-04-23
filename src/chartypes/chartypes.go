@@ -35,6 +35,7 @@ func IsSymbol(c byte) bool {
 		c == '*' ||
 		c == '+' ||
 		c == '-' ||
+		c == '%' ||
 		c == '(' ||
 		c == ')'
 }

@@ -48,13 +48,22 @@ var operators = [...]operator{
 		},
 	},
 	{
+		token:         "%",
+		precedence:    5,
+		associativity: associativityLeft,
+		evaluate: func(a, b float64) float64 {
+			return math.Mod(a, b)
+		},
+	},
+	{
 		token:         "/",
 		precedence:    5,
 		associativity: associativityLeft,
 		evaluate: func(a, b float64) float64 {
 			return a / b
 		},
-	}, {
+	},
+	{
 		token:         "*",
 		precedence:    5,
 		associativity: associativityLeft,
