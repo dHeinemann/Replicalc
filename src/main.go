@@ -120,7 +120,9 @@ func repl() {
 		fmt.Println()
 		input, err := line.Prompt("> ")
 		if err != nil {
-			fmt.Printf("Fatal error: %v\n", err.Error())
+			if err != liner.ErrPromptAborted {
+				fmt.Printf("Fatal error: %v\n", err.Error())
+			}
 			return
 		} else {
 			line.AppendHistory(input)
@@ -129,6 +131,9 @@ func repl() {
 		input = strings.Trim(input, "\n\r ")
 		if cmd.IsCommand(input) {
 			if err := cmd.ExecCommand(input); err != nil {
+				if err == cmd.ErrExitCommand {
+					return
+				}
 				fmt.Printf("Error: %v\n", err.Error())
 			}
 			continue

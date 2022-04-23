@@ -34,12 +34,13 @@ type command struct {
 	execute     func(args []string) error
 }
 
+var ErrExitCommand = errors.New("User sent 'exit' command.")
+
 func exit(args []string) error {
 	if len(args) > 1 {
 		return errors.New(fmt.Sprintf("Error: command '%v' has no arguments.", args[0]))
 	}
-	os.Exit(0)
-	return nil
+	return ErrExitCommand
 }
 
 func help(args []string) error {
