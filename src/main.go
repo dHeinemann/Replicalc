@@ -16,15 +16,14 @@
 package main
 
 import (
-	"bufio"
 	"fmt"
 	"math"
-	"os"
 	"strconv"
 	"strings"
 
 	"dheinemann.com/replicalc/calc"
 	"dheinemann.com/replicalc/chartypes"
+	"github.com/peterh/liner"
 )
 
 const versionNum = "0.2.0"
@@ -113,13 +112,18 @@ func getTargetAndExpression(expr string) (varName string, adjustedExpr string, o
 
 // Start the REPL.
 func repl() {
+	line := liner.NewLiner()
+	defer line.Close()
+
+	line.SetCtrlCAborts(true)
+
 	for {
-		fmt.Printf("\n> ")
-		reader := bufio.NewReader(os.Stdin)
-		expr, err := reader.ReadString('\n')
+		expr, err := line.Prompt("> ")
 		if err != nil {
-			fmt.Printf("Error: invalid input\n")
-			continue
+			fmt.Printf("Fatal error: %v\n", err.Error())
+			return
+		} else {
+			line.AppendHistory(expr)
 		}
 
 		expr = strings.Trim(expr, "\n\r ")
@@ -161,6 +165,7 @@ func repl() {
 
 func main() {
 	printCopyright()
+	fmt.Println()
 	calc.InitializeVariables()
 	repl()
 }
