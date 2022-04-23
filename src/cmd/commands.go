@@ -19,7 +19,11 @@ import (
 	"errors"
 	"fmt"
 	"os"
+	"sort"
 	"strings"
+
+	"dheinemann.com/replicalc/calc"
+	"github.com/jedib0t/go-pretty/v6/table"
 )
 
 func exit(args []string) error {
@@ -33,6 +37,21 @@ func exit(args []string) error {
 var commands = map[string]func(args []string) error{
 	"exit": exit,
 	"quit": exit,
+	"vars": func(args []string) error {
+		t := table.NewWriter()
+		t.SetOutputMirror(os.Stdout)
+		t.AppendHeader(table.Row{"Name", "Value"})
+
+		vars := calc.GetVars()
+		sort.Strings(vars)
+		for _, k := range vars {
+			t.AppendRow([]interface{}{k, calc.GetVar(k)})
+		}
+
+		t.Render()
+
+		return nil
+	},
 }
 
 func IsCommand(input string) bool {
