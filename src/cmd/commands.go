@@ -23,8 +23,16 @@ import (
 	"strings"
 
 	"dheinemann.com/replicalc/calc"
+	"dheinemann.com/replicalc/meta"
 	"github.com/jedib0t/go-pretty/v6/table"
 )
+
+type command struct {
+	name        string
+	description string
+	printable   bool
+	execute     func(args []string) error
+}
 
 func exit(args []string) error {
 	if len(args) > 1 {
@@ -34,25 +42,106 @@ func exit(args []string) error {
 	return nil
 }
 
-var commands = map[string]func(args []string) error{
-	"exit": exit,
-	"quit": exit,
-	"vars": func(args []string) error {
-		t := table.NewWriter()
-		t.SetOutputMirror(os.Stdout)
-		t.AppendHeader(table.Row{"Name", "Value"})
+func help(args []string) error {
+	if len(args) > 1 {
+		return errors.New(fmt.Sprintf("Error: command '%v' has no arguments.", args[0]))
+	}
 
-		vars := calc.GetVars()
-		sort.Strings(vars)
-		for _, k := range vars {
-			t.AppendRow([]interface{}{k, calc.GetVar(k)})
+	fmt.Println("Commands:")
+
+	t := table.NewWriter()
+	t.SetOutputMirror(os.Stdout)
+	t.Style().Options.DrawBorder = false
+	t.Style().Options.SeparateColumns = false
+
+	for _, v := range getCommands() {
+		if !v.printable {
+			continue
 		}
+		t.AppendRow([]interface{}{v.name, v.description})
+	}
+	t.Render()
 
-		t.Render()
-
-		return nil
-	},
+	return nil
 }
+
+func getCommands() []command {
+	commands := []command{
+		{
+			name:        "exit",
+			description: "Exit Replicalc",
+			printable:   true,
+			execute:     exit,
+		},
+		{
+			name:      "quit",
+			printable: false,
+			execute:   exit,
+		},
+		{
+			name:        "vars",
+			description: "Print list of variables and their values",
+			printable:   true,
+			execute: func(args []string) error {
+				fmt.Println("Variables:")
+
+				vars := calc.GetVars()
+				if len(vars) == 0 {
+					fmt.Println(" (no variables)")
+				}
+
+				t := table.NewWriter()
+				t.SetOutputMirror(os.Stdout)
+				t.Style().Options.DrawBorder = false
+				t.Style().Options.SeparateColumns = false
+
+				sort.Strings(vars)
+				for _, k := range vars {
+					t.AppendRow([]interface{}{k, calc.GetVar(k)})
+				}
+
+				t.Render()
+
+				return nil
+			},
+		},
+		{
+			name:        "help",
+			description: "Print help text",
+			printable:   true,
+			execute:     help,
+		},
+		{
+			name:      "?",
+			printable: false,
+			execute:   help,
+		},
+		{
+			name:        "version",
+			description: "Print version information",
+			printable:   true,
+			execute: func(args []string) error {
+				fmt.Println(meta.TitleText)
+				return nil
+			},
+		},
+	}
+
+	return commands
+}
+
+func newCommandMap() map[string]command {
+	commands := getCommands()
+
+	commandMap := map[string]command{}
+	for i, v := range commands {
+		commandMap[v.name] = commands[i]
+	}
+
+	return commandMap
+}
+
+var commands map[string]command = newCommandMap()
 
 func IsCommand(input string) bool {
 	commandName := strings.Split(input, " ")[0]
@@ -68,5 +157,5 @@ func ExecCommand(input string) error {
 		return errors.New(fmt.Sprintf("Error: command '%v' does not exist.", commandName))
 	}
 
-	return command(args)
+	return command.execute(args)
 }

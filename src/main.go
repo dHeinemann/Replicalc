@@ -24,19 +24,17 @@ import (
 	"dheinemann.com/replicalc/calc"
 	"dheinemann.com/replicalc/chartypes"
 	"dheinemann.com/replicalc/cmd"
+	"dheinemann.com/replicalc/meta"
 	"github.com/peterh/liner"
 )
-
-const versionNum = "0.2.0"
 
 // Default variable to store evaluated result in
 const defaultVarName = "ans"
 
+// Print Replicalc copyright and license details
 func printCopyright() {
-	fmt.Printf("Replicalc %v, Copyright (C) 2022 David Heinemann\n", versionNum)
-	fmt.Printf("Replicalc comes with ABSOLUTELY NO WARRANTY.\n")
-	fmt.Printf("This is free software, and you are welcome to redistribute it\n")
-	fmt.Printf("under certain conditions. See the LICENSE file for details.\n")
+	fmt.Println(meta.TitleText)
+	fmt.Println(meta.LicenseText)
 }
 
 func handleError(errorCode calc.ErrorCode, context string) {
@@ -119,6 +117,7 @@ func repl() {
 	line.SetCtrlCAborts(true)
 
 	for {
+		fmt.Println()
 		input, err := line.Prompt("> ")
 		if err != nil {
 			fmt.Printf("Fatal error: %v\n", err.Error())
@@ -169,7 +168,6 @@ func repl() {
 
 func main() {
 	printCopyright()
-	fmt.Println()
 	calc.InitializeVariables()
 	repl()
 }
