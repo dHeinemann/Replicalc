@@ -36,3 +36,12 @@ func GetVar(key string) float64 {
 func SetVar(key string, value float64) {
 	variables[key] = value
 }
+
+func GetVars() []string {
+	vars := []string{}
+	for k := range variables {
+		vars = append(vars, k)
+	}
+
+	return vars
+}

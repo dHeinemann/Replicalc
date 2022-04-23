@@ -23,6 +23,7 @@ import (
 
 	"dheinemann.com/replicalc/calc"
 	"dheinemann.com/replicalc/chartypes"
+	"dheinemann.com/replicalc/cmd"
 	"github.com/peterh/liner"
 )
 
@@ -118,32 +119,35 @@ func repl() {
 	line.SetCtrlCAborts(true)
 
 	for {
-		expr, err := line.Prompt("> ")
+		input, err := line.Prompt("> ")
 		if err != nil {
 			fmt.Printf("Fatal error: %v\n", err.Error())
 			return
 		} else {
-			line.AppendHistory(expr)
+			line.AppendHistory(input)
 		}
 
-		expr = strings.Trim(expr, "\n\r ")
-		if isExit(expr) {
-			break
+		input = strings.Trim(input, "\n\r ")
+		if cmd.IsCommand(input) {
+			if err := cmd.ExecCommand(input); err != nil {
+				fmt.Printf("Error: %v\n", err.Error())
+			}
+			continue
 		}
 
 		// User may print the value of a variable by writing its name. In this case, it shouldn't be evaluated as a math
 		// expression.
-		if calc.VarExists(expr) {
-			printVariable(expr)
+		if calc.VarExists(input) {
+			printVariable(input)
 			continue
 		}
 
-		varName, expr, ok := getTargetAndExpression(expr)
+		varName, input, ok := getTargetAndExpression(input)
 		if !ok {
 			fmt.Printf("Error: Invalid variable name '%v'\n", varName)
 			continue
 		}
-		result, errorCode, context := calc.Calculate(expr)
+		result, errorCode, context := calc.Calculate(input)
 
 		if errorCode != calc.ErrorSuccess {
 			handleError(errorCode, context)
