@@ -75,3 +75,9 @@ func TestEvaluate_ComplexExpression_EvaluatesWithCorrectPrecedence(t *testing.T)
 
 	assert.Equal(t, 24.0, result)
 }
+
+func TestEvaluate_InvalidSymbols_ReturnsError(t *testing.T) {
+	_, err := calc.Evaluate("1 @#$& 7")
+
+	assert.NotNil(t, err, "Error should be thrown if invalid symbols are used")
+}

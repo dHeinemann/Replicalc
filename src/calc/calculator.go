@@ -87,7 +87,7 @@ func (calc Calculator) isNegativeSign(expr string, i int) bool {
 }
 
 // Convert an expression into a series of tokens.
-func (calc Calculator) tokenize(expr string) []string {
+func (calc Calculator) tokenize(expr string) ([]string, error) {
 	lastTokenType := tokenTypeNone
 	tokens := []string{}
 
@@ -119,6 +119,8 @@ func (calc Calculator) tokenize(expr string) []string {
 
 			currentToken += string(expr[i])
 			lastTokenType = tokenTypeLetter
+		} else if expr[i] != ' ' {
+			return nil, errors.New(fmt.Sprintf("Unknown character '%s' at index %v", string(expr[i]), i))
 		}
 	}
 
@@ -126,7 +128,7 @@ func (calc Calculator) tokenize(expr string) []string {
 		tokens = append(tokens, currentToken)
 	}
 
-	return tokens
+	return tokens, nil
 }
 
 func (calc Calculator) infixToPostfix(tokens []string) []string {
@@ -237,9 +239,12 @@ func (calc Calculator) Evaluate(expr string) (result float64, err error) {
 		return 0, nil
 	}
 
-	infixTokens := calc.tokenize(expr)
-	postfixTokens := calc.infixToPostfix(infixTokens)
-	result, err = calc.evaluate(postfixTokens)
+	if infixTokens, err := calc.tokenize(expr); err != nil {
+		return 0, err
+	} else {
+		postfixTokens := calc.infixToPostfix(infixTokens)
+		result, err = calc.evaluate(postfixTokens)
 
-	return result, err
+		return result, err
+	}
 }
