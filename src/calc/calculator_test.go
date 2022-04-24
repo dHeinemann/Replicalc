@@ -25,6 +25,7 @@ var calc Calculator
 
 func TestMain(m *testing.M) {
 	calc = NewCalculator()
+	m.Run()
 }
 
 func TestEvaluate_OnePlusOne_Returns2(t *testing.T) {
