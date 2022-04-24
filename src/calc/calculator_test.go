@@ -48,6 +48,11 @@ func TestEvaluate_DivideByZero_ReturnsError(t *testing.T) {
 	assert.Equal(t, ErrDivideByZero, err)
 }
 
+func TestEvaluate_DivideByNegativeInteger_EvaluatesCorrectly(t *testing.T) {
+	result, _ := calc.Evaluate("10 / -8")
+	assert.Equal(t, -1.25, result)
+}
+
 func TestEvaluate_DivideByNegativeZero_ReturnsError(t *testing.T) {
 	_, err := calc.Evaluate("1 / -0")
 	assert.Equal(t, ErrDivideByZero, err)

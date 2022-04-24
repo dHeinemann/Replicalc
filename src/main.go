@@ -38,10 +38,10 @@ func printCopyright() {
 // Format a float for printing
 func formatFloat(value float64) string {
 	// Omit decimal places when value is a whole number
-	if math.Mod(value, 1) > 0 {
-		return strconv.FormatFloat(value, 'f', 4, 64)
-	} else {
+	if math.Mod(value, 1) == 0 {
 		return strconv.FormatFloat(value, 'f', 0, 64)
+	} else {
+		return strconv.FormatFloat(value, 'f', 4, 64)
 	}
 }
 
