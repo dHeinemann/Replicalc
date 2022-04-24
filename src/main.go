@@ -28,9 +28,6 @@ import (
 	"github.com/peterh/liner"
 )
 
-// Default variable to store evaluated result in
-const defaultVarName = "ans"
-
 // Print Replicalc copyright and license details
 func printCopyright() {
 	fmt.Println(meta.TitleText)
@@ -51,10 +48,6 @@ func handleError(errorCode calc.ErrorCode, context string) {
 	}
 }
 
-func isExit(input string) bool {
-	return input == "exit" || input == "quit"
-}
-
 // Format a float for printing
 func formatFloat(value float64) string {
 	// Omit decimal places when value is a whole number
@@ -72,8 +65,8 @@ func printFloat(value float64) {
 }
 
 // Print the value of a variable
-func printVariable(varName string) {
-	formattedValue := formatFloat(calc.GetVar(varName))
+func printVariable(varName string, calculator calc.Calculator) {
+	formattedValue := formatFloat(calculator.Variables().Get(varName))
 	fmt.Printf("%v = %v\n", varName, formattedValue)
 }
 
@@ -102,7 +95,7 @@ func getTargetAndExpression(expr string) (varName string, adjustedExpr string, o
 			return varName, adjustedExpr, false
 		}
 	} else {
-		varName = defaultVarName
+		varName = calc.DefaultVarName
 		adjustedExpr = expr
 	}
 
@@ -115,6 +108,8 @@ func repl() {
 	defer line.Close()
 
 	line.SetCtrlCAborts(true)
+
+	calculator := calc.NewCalculator()
 
 	for {
 		fmt.Println()
@@ -130,7 +125,7 @@ func repl() {
 
 		input = strings.Trim(input, "\n\r ")
 		if cmd.IsCommand(input) {
-			if err := cmd.ExecCommand(input); err != nil {
+			if err := cmd.ExecCommand(input, calculator); err != nil {
 				if err == cmd.ErrExitCommand {
 					return
 				}
@@ -141,8 +136,8 @@ func repl() {
 
 		// User may print the value of a variable by writing its name. In this case, it shouldn't be evaluated as a math
 		// expression.
-		if calc.VarExists(input) {
-			printVariable(input)
+		if calculator.Variables().Exists(input) {
+			printVariable(input, calculator)
 			continue
 		}
 
@@ -151,7 +146,7 @@ func repl() {
 			fmt.Printf("Error: Invalid variable name '%v'\n", varName)
 			continue
 		}
-		result, errorCode, context := calc.Calculate(input)
+		result, errorCode, context := calculator.Evaluate(input)
 
 		if errorCode != calc.ErrorSuccess {
 			handleError(errorCode, context)
@@ -159,12 +154,13 @@ func repl() {
 		}
 
 		// Set the target variable ("ans" by default)
-		calc.SetVar(varName, result)
+		varDb := calculator.Variables()
+		varDb.Set(varName, result)
 
 		// Print formatted result
-		if varName != defaultVarName {
+		if varName != calc.DefaultVarName {
 			// User set non-default variable; show what was set
-			printVariable(varName)
+			printVariable(varName, calculator)
 		} else {
 			printFloat(result)
 		}
@@ -173,6 +169,5 @@ func repl() {
 
 func main() {
 	printCopyright()
-	calc.InitializeVariables()
 	repl()
 }

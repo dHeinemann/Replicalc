@@ -31,19 +31,19 @@ type command struct {
 	name        string
 	description string
 	printable   bool
-	execute     func(args []string) error
+	execute     func(args []string, calculator calc.Calculator) error
 }
 
 var ErrExitCommand = errors.New("User sent 'exit' command.")
 
-func exit(args []string) error {
+func exit(args []string, calculator calc.Calculator) error {
 	if len(args) > 1 {
 		return errors.New(fmt.Sprintf("Error: command '%v' has no arguments.", args[0]))
 	}
 	return ErrExitCommand
 }
 
-func help(args []string) error {
+func help(args []string, calculator calc.Calculator) error {
 	if len(args) > 1 {
 		return errors.New(fmt.Sprintf("Error: command '%v' has no arguments.", args[0]))
 	}
@@ -83,10 +83,10 @@ func getCommands() []command {
 			name:        "vars",
 			description: "Print list of variables and their values",
 			printable:   true,
-			execute: func(args []string) error {
+			execute: func(args []string, calculator calc.Calculator) error {
 				fmt.Println("Variables:")
 
-				vars := calc.GetVars()
+				vars := calculator.Variables().GetAll()
 				if len(vars) == 0 {
 					fmt.Println(" (no variables)")
 				}
@@ -98,7 +98,7 @@ func getCommands() []command {
 
 				sort.Strings(vars)
 				for _, k := range vars {
-					t.AppendRow([]interface{}{k, calc.GetVar(k)})
+					t.AppendRow([]interface{}{k, calculator.Variables().Get(k)})
 				}
 
 				t.Render()
@@ -121,7 +121,7 @@ func getCommands() []command {
 			name:        "version",
 			description: "Print version information",
 			printable:   true,
-			execute: func(args []string) error {
+			execute: func(args []string, calculator calc.Calculator) error {
 				fmt.Println(meta.TitleText)
 				return nil
 			},
@@ -150,7 +150,7 @@ func IsCommand(input string) bool {
 	return ok
 }
 
-func ExecCommand(input string) error {
+func ExecCommand(input string, calculator calc.Calculator) error {
 	args := strings.Split(input, " ")
 	commandName := args[0]
 	command, ok := commands[commandName]
@@ -158,5 +158,5 @@ func ExecCommand(input string) error {
 		return errors.New(fmt.Sprintf("Error: command '%v' does not exist.", commandName))
 	}
 
-	return command.execute(args)
+	return command.execute(args, calculator)
 }

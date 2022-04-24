@@ -22,6 +22,10 @@ import (
 	"dheinemann.com/replicalc/stack"
 )
 
+type Calculator struct {
+	Variables func() VariableDb
+}
+
 // Token types
 type tokenType byte
 
@@ -42,8 +46,18 @@ const (
 	ErrorUnknownVariable       ErrorCode = iota
 )
 
+// Create and initialize a new Calculator.
+func NewCalculator() Calculator {
+	db := newVariableDb()
+	return Calculator{
+		Variables: func() VariableDb {
+			return db
+		},
+	}
+}
+
 // Check whether the character at index i is the negative sign for the number that follows it.
-func isNegative(expr string, i int) bool {
+func (calc Calculator) isNegativeSign(expr string, i int) bool {
 	if expr[i] != '-' {
 		return false
 	}
@@ -63,7 +77,7 @@ func isNegative(expr string, i int) bool {
 }
 
 // Convert an expression into a series of tokens.
-func tokenize(expr string) []string {
+func (calc Calculator) tokenize(expr string) []string {
 	lastTokenType := tokenTypeNone
 	tokens := []string{}
 
@@ -71,7 +85,7 @@ func tokenize(expr string) []string {
 	for i := 0; i < len(expr); i++ {
 		hasUnfinishedToken := len(currentToken) > 0
 
-		if chartypes.IsNumeric(expr[i]) || isNegative(expr, i) {
+		if chartypes.IsNumeric(expr[i]) || calc.isNegativeSign(expr, i) {
 			if hasUnfinishedToken && lastTokenType != tokenTypeDigit {
 				tokens = append(tokens, currentToken)
 				currentToken = ""
@@ -105,7 +119,7 @@ func tokenize(expr string) []string {
 	return tokens
 }
 
-func infixToPostfix(tokens []string) []string {
+func (calc Calculator) infixToPostfix(tokens []string) []string {
 	output := []string{}
 
 	ops := stack.StringStack{}
@@ -154,7 +168,8 @@ func infixToPostfix(tokens []string) []string {
 	return output
 }
 
-func evaluate(tokens []string) (result float64, errorCode ErrorCode, context string) {
+// Evaluate an RPN expression
+func (calc Calculator) evaluate(tokens []string) (result float64, errorCode ErrorCode, context string) {
 	valueStack := stack.FloatStack{}
 
 	for i := 0; i < len(tokens); i++ {
@@ -170,8 +185,8 @@ func evaluate(tokens []string) (result float64, errorCode ErrorCode, context str
 			value, err := strconv.ParseFloat(tokens[i], 64)
 
 			if err != nil {
-				if VarExists(tokens[i]) {
-					value = GetVar(tokens[i])
+				if calc.Variables().Exists(tokens[i]) {
+					value = calc.Variables().Get(tokens[i])
 				} else {
 					return 0.0, ErrorUnknownVariable, tokens[i]
 				}
@@ -185,7 +200,7 @@ func evaluate(tokens []string) (result float64, errorCode ErrorCode, context str
 	return nextOp, ErrorSuccess, ""
 }
 
-func hasBalancedParantheses(expr string) bool {
+func (calc Calculator) hasBalancedParantheses(expr string) bool {
 	numParens := 0
 	for i := 0; i < len(expr); i++ {
 		if expr[i] == '(' {
@@ -202,8 +217,9 @@ func hasBalancedParantheses(expr string) bool {
 	return numParens == 0
 }
 
-func Calculate(expr string) (result float64, errorCode ErrorCode, context string) {
-	if !hasBalancedParantheses(expr) {
+// Evaluate an expression and return the result.
+func (calc Calculator) Evaluate(expr string) (result float64, errorCode ErrorCode, context string) {
+	if !calc.hasBalancedParantheses(expr) {
 		return 0, ErrorUnbalancedParantheses, ""
 	}
 
@@ -211,9 +227,9 @@ func Calculate(expr string) (result float64, errorCode ErrorCode, context string
 		return 0, ErrorSuccess, ""
 	}
 
-	infixTokens := tokenize(expr)
-	postfixTokens := infixToPostfix(infixTokens)
-	result, errorCode, context = evaluate(postfixTokens)
+	infixTokens := calc.tokenize(expr)
+	postfixTokens := calc.infixToPostfix(infixTokens)
+	result, errorCode, context = calc.evaluate(postfixTokens)
 
 	return result, errorCode, context
 }

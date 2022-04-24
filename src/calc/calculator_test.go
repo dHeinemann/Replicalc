@@ -21,49 +21,51 @@ import (
 	"github.com/stretchr/testify/assert"
 )
 
+var calc Calculator
+
 func TestMain(m *testing.M) {
-	InitializeVariables()
+	calc = NewCalculator()
 }
 
-func TestCalculate_OnePlusOne_Returns2(t *testing.T) {
-	result, _, _ := Calculate("1 + 1")
+func TestEvaluate_OnePlusOne_Returns2(t *testing.T) {
+	result, _, _ := calc.Evaluate("1 + 1")
 	assert.Equal(t, 2.0, result)
 }
 
-func TestCalculate_UnbalancedOpenParen_ReturnsError(t *testing.T) {
-	_, errorCode, _ := Calculate("3 * (1/4")
+func TestEvaluate_UnbalancedOpenParen_ReturnsError(t *testing.T) {
+	_, errorCode, _ := calc.Evaluate("3 * (1/4")
 	assert.Equal(t, ErrorUnbalancedParantheses, errorCode)
 }
 
-func TestCalculate_lnbalancedCloseParen_ReturnsError(t *testing.T) {
-	_, errorCode, _ := Calculate("3 * 1/4)")
+func TestEvaluate_UnbalancedCloseParen_ReturnsError(t *testing.T) {
+	_, errorCode, _ := calc.Evaluate("3 * 1/4)")
 	assert.Equal(t, ErrorUnbalancedParantheses, errorCode)
 }
 
-func TestCalculate_DivideByZero_ReturnsError(t *testing.T) {
-	_, errorCode, _ := Calculate("1 / 0")
+func TestEvaluate_DivideByZero_ReturnsError(t *testing.T) {
+	_, errorCode, _ := calc.Evaluate("1 / 0")
 	assert.Equal(t, ErrorDivideByZero, errorCode)
 }
 
-func TestCalculate_DivideByNegativeZero_ReturnsError(t *testing.T) {
-	_, errorCode, _ := Calculate("1 / -0")
+func TestEvaluate_DivideByNegativeZero_ReturnsError(t *testing.T) {
+	_, errorCode, _ := calc.Evaluate("1 / -0")
 	assert.Equal(t, ErrorDivideByZero, errorCode)
 }
 
-func TestCalculate_ComplexExpressionWithoutSpaces_EvaluatesCorrectly(t *testing.T) {
-	result, _, _ := Calculate("3*2+4*5-6")
+func TestEvaluate_ComplexExpressionWithoutSpaces_EvaluatesCorrectly(t *testing.T) {
+	result, _, _ := calc.Evaluate("3*2+4*5-6")
 
 	assert.Equal(t, 20.0, result)
 }
 
-func TestCalculate_ComplexExpressionWithSpaces_EvaluatesCorrectly(t *testing.T) {
-	result, _, _ := Calculate("3 * 2 + 4 * 5 - 6")
+func TestEvaluate_ComplexExpressionWithSpaces_EvaluatesCorrectly(t *testing.T) {
+	result, _, _ := calc.Evaluate("3 * 2 + 4 * 5 - 6")
 
 	assert.Equal(t, 20.0, result)
 }
 
-func TestCalculate_ComplexExpression_EvaluatesWithCorrectPrecedence(t *testing.T) {
-	result, _, _ := Calculate("3*2+4*5-6/3")
+func TestEvaluate_ComplexExpression_EvaluatesWithCorrectPrecedence(t *testing.T) {
+	result, _, _ := calc.Evaluate("3*2+4*5-6/3")
 
 	assert.Equal(t, 24.0, result)
 }

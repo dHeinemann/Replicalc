@@ -15,31 +15,35 @@
 
 package calc
 
-var variables map[string]float64
+// Default variable to store evaluated result in
+const DefaultVarName = "ans"
 
-var variablesInitialized bool = false
-
-func InitializeVariables() {
-	variables = make(map[string]float64)
-	variablesInitialized = true
+type VariableDb struct {
+	variables map[string]float64
 }
 
-func VarExists(key string) bool {
-	_, ok := variables[key]
+func newVariableDb() VariableDb {
+	return VariableDb{
+		variables: make(map[string]float64),
+	}
+}
+
+func (db VariableDb) Exists(key string) bool {
+	_, ok := db.variables[key]
 	return ok
 }
 
-func GetVar(key string) float64 {
-	return variables[key]
+func (db VariableDb) Get(key string) float64 {
+	return db.variables[key]
 }
 
-func SetVar(key string, value float64) {
-	variables[key] = value
+func (db *VariableDb) Set(key string, value float64) {
+	db.variables[key] = value
 }
 
-func GetVars() []string {
+func (db VariableDb) GetAll() []string {
 	vars := []string{}
-	for k := range variables {
+	for k := range db.variables {
 		vars = append(vars, k)
 	}
 
