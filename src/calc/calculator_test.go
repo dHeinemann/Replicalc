@@ -28,44 +28,44 @@ func TestMain(m *testing.M) {
 }
 
 func TestEvaluate_OnePlusOne_Returns2(t *testing.T) {
-	result, _, _ := calc.Evaluate("1 + 1")
+	result, _ := calc.Evaluate("1 + 1")
 	assert.Equal(t, 2.0, result)
 }
 
 func TestEvaluate_UnbalancedOpenParen_ReturnsError(t *testing.T) {
-	_, errorCode, _ := calc.Evaluate("3 * (1/4")
-	assert.Equal(t, ErrorUnbalancedParantheses, errorCode)
+	_, err := calc.Evaluate("3 * (1/4")
+	assert.Equal(t, ErrUnbalancedParantheses, err)
 }
 
 func TestEvaluate_UnbalancedCloseParen_ReturnsError(t *testing.T) {
-	_, errorCode, _ := calc.Evaluate("3 * 1/4)")
-	assert.Equal(t, ErrorUnbalancedParantheses, errorCode)
+	_, err := calc.Evaluate("3 * 1/4)")
+	assert.Equal(t, ErrUnbalancedParantheses, err)
 }
 
 func TestEvaluate_DivideByZero_ReturnsError(t *testing.T) {
-	_, errorCode, _ := calc.Evaluate("1 / 0")
-	assert.Equal(t, ErrorDivideByZero, errorCode)
+	_, err := calc.Evaluate("1 / 0")
+	assert.Equal(t, ErrDivideByZero, err)
 }
 
 func TestEvaluate_DivideByNegativeZero_ReturnsError(t *testing.T) {
-	_, errorCode, _ := calc.Evaluate("1 / -0")
-	assert.Equal(t, ErrorDivideByZero, errorCode)
+	_, err := calc.Evaluate("1 / -0")
+	assert.Equal(t, ErrDivideByZero, err)
 }
 
 func TestEvaluate_ComplexExpressionWithoutSpaces_EvaluatesCorrectly(t *testing.T) {
-	result, _, _ := calc.Evaluate("3*2+4*5-6")
+	result, _ := calc.Evaluate("3*2+4*5-6")
 
 	assert.Equal(t, 20.0, result)
 }
 
 func TestEvaluate_ComplexExpressionWithSpaces_EvaluatesCorrectly(t *testing.T) {
-	result, _, _ := calc.Evaluate("3 * 2 + 4 * 5 - 6")
+	result, _ := calc.Evaluate("3 * 2 + 4 * 5 - 6")
 
 	assert.Equal(t, 20.0, result)
 }
 
 func TestEvaluate_ComplexExpression_EvaluatesWithCorrectPrecedence(t *testing.T) {
-	result, _, _ := calc.Evaluate("3*2+4*5-6/3")
+	result, _ := calc.Evaluate("3*2+4*5-6/3")
 
 	assert.Equal(t, 24.0, result)
 }

@@ -16,6 +16,8 @@
 package calc
 
 import (
+	"errors"
+	"fmt"
 	"strconv"
 
 	"dheinemann.com/replicalc/chartypes"
@@ -36,15 +38,25 @@ const (
 	tokenTypeLetter   tokenType = iota
 )
 
-// Error codes
-type ErrorCode byte
+type unknownVariableError struct {
+	msg      string
+	variable string
+}
 
-const (
-	ErrorSuccess               ErrorCode = iota
-	ErrorUnbalancedParantheses ErrorCode = iota
-	ErrorDivideByZero          ErrorCode = iota
-	ErrorUnknownVariable       ErrorCode = iota
-)
+func (e unknownVariableError) Error() string {
+	return e.msg
+}
+
+func unknownVariable(varName string) error {
+	return unknownVariableError{
+		msg:      fmt.Sprintf("Unknown variable: '%v'", varName),
+		variable: varName,
+	}
+}
+
+// General error types
+var ErrUnbalancedParantheses = errors.New("Unbalanced parentheses")
+var ErrDivideByZero = errors.New("Division by zero")
 
 // Create and initialize a new Calculator.
 func NewCalculator() Calculator {
@@ -169,7 +181,7 @@ func (calc Calculator) infixToPostfix(tokens []string) []string {
 }
 
 // Evaluate an RPN expression
-func (calc Calculator) evaluate(tokens []string) (result float64, errorCode ErrorCode, context string) {
+func (calc Calculator) evaluate(tokens []string) (float64, error) {
 	valueStack := stack.FloatStack{}
 
 	for i := 0; i < len(tokens); i++ {
@@ -188,7 +200,7 @@ func (calc Calculator) evaluate(tokens []string) (result float64, errorCode Erro
 				if calc.Variables().Exists(tokens[i]) {
 					value = calc.Variables().Get(tokens[i])
 				} else {
-					return 0.0, ErrorUnknownVariable, tokens[i]
+					return 0.0, unknownVariable(tokens[i])
 				}
 			}
 
@@ -197,7 +209,7 @@ func (calc Calculator) evaluate(tokens []string) (result float64, errorCode Erro
 	}
 
 	nextOp, _ := valueStack.Pop()
-	return nextOp, ErrorSuccess, ""
+	return nextOp, nil
 }
 
 func (calc Calculator) hasBalancedParantheses(expr string) bool {
@@ -218,18 +230,18 @@ func (calc Calculator) hasBalancedParantheses(expr string) bool {
 }
 
 // Evaluate an expression and return the result.
-func (calc Calculator) Evaluate(expr string) (result float64, errorCode ErrorCode, context string) {
+func (calc Calculator) Evaluate(expr string) (result float64, err error) {
 	if !calc.hasBalancedParantheses(expr) {
-		return 0, ErrorUnbalancedParantheses, ""
+		return 0, ErrUnbalancedParantheses
 	}
 
 	if len(expr) == 0 {
-		return 0, ErrorSuccess, ""
+		return 0, nil
 	}
 
 	infixTokens := calc.tokenize(expr)
 	postfixTokens := calc.infixToPostfix(infixTokens)
-	result, errorCode, context = calc.evaluate(postfixTokens)
+	result, err = calc.evaluate(postfixTokens)
 
-	return result, errorCode, context
+	return result, err
 }

@@ -16,6 +16,7 @@
 package main
 
 import (
+	"errors"
 	"fmt"
 	"math"
 	"strconv"
@@ -32,20 +33,6 @@ import (
 func printCopyright() {
 	fmt.Println(meta.TitleText)
 	fmt.Println(meta.LicenseText)
-}
-
-func handleError(errorCode calc.ErrorCode, context string) {
-	if errorCode == calc.ErrorSuccess {
-		return
-	} else if errorCode == calc.ErrorDivideByZero {
-		fmt.Printf("Error: Division by zero\n")
-	} else if errorCode == calc.ErrorUnbalancedParantheses {
-		fmt.Printf("Error: Unbalanced parantheses\n")
-	} else if errorCode == calc.ErrorUnknownVariable {
-		fmt.Printf("Error: Unknown variable '%v'\n", context)
-	} else {
-		fmt.Printf("Unexpected error\n")
-	}
 }
 
 // Format a float for printing
@@ -76,30 +63,28 @@ func printVariable(varName string, calculator calc.Calculator) {
 // For example:
 //   "2 * 5"       -> ("ans", "2 * 5")
 //   "foo = 2 * 5" -> ("foo", "2 * 5")
-func getTargetAndExpression(expr string) (varName string, adjustedExpr string, ok bool) {
+func getTargetAndExpression(expr string) (varName string, adjustedExpr string, err error) {
 	eqIndex := strings.Index(expr, "=")
 	if eqIndex >= 0 {
 		// Valid syntax for setting variable is 'VARNAME = EXPR'
 		varName = strings.TrimSpace(expr[:eqIndex])
 		adjustedExpr = strings.TrimSpace(expr[eqIndex+1:])
 
-		// Variable name must only consist of alphabetical characters
 		for i := 0; i < len(varName); i++ {
 			if !chartypes.IsLetter(varName[i]) {
-				return varName, adjustedExpr, false
+				return varName, adjustedExpr, errors.New("Variable name must only consist of alphabetical characters")
 			}
 		}
 
-		// Variable name cannot be an empty string
 		if len(varName) == 0 {
-			return varName, adjustedExpr, false
+			return varName, adjustedExpr, errors.New("Must specify a variable name when using assignment operator (=)")
 		}
 	} else {
 		varName = calc.DefaultVarName
 		adjustedExpr = expr
 	}
 
-	return varName, adjustedExpr, true
+	return varName, adjustedExpr, nil
 }
 
 // Start the REPL.
@@ -114,8 +99,10 @@ func repl() {
 	for {
 		fmt.Println()
 		input, err := line.Prompt("> ")
+
 		if err != nil {
 			if err != liner.ErrPromptAborted {
+				// ErrPromptAborted gets thrown by Ctrl+C
 				fmt.Printf("Fatal error: %v\n", err.Error())
 			}
 			return
@@ -124,6 +111,10 @@ func repl() {
 		}
 
 		input = strings.Trim(input, "\n\r ")
+		if len(input) == 0 {
+			continue
+		}
+
 		if cmd.IsCommand(input) {
 			if err := cmd.ExecCommand(input, calculator); err != nil {
 				if err == cmd.ErrExitCommand {
@@ -141,15 +132,15 @@ func repl() {
 			continue
 		}
 
-		varName, input, ok := getTargetAndExpression(input)
-		if !ok {
-			fmt.Printf("Error: Invalid variable name '%v'\n", varName)
+		varName, input, err := getTargetAndExpression(input)
+		if err != nil {
+			fmt.Printf(err.Error())
 			continue
 		}
-		result, errorCode, context := calculator.Evaluate(input)
 
-		if errorCode != calc.ErrorSuccess {
-			handleError(errorCode, context)
+		result, err := calculator.Evaluate(input)
+		if err != nil {
+			fmt.Println(err.Error())
 			continue
 		}
 
