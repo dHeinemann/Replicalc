@@ -134,13 +134,13 @@ func repl() {
 
 		varName, input, err := getTargetAndExpression(input)
 		if err != nil {
-			fmt.Printf(err.Error())
+			fmt.Printf("Error: %v\n", err.Error())
 			continue
 		}
 
 		result, err := calculator.Evaluate(input)
 		if err != nil {
-			fmt.Println(err.Error())
+			fmt.Printf("Error: %v\n", err.Error())
 			continue
 		}
 

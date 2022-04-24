@@ -54,9 +54,7 @@ func unknownVariable(varName string) error {
 	}
 }
 
-// General error types
 var ErrUnbalancedParantheses = errors.New("Unbalanced parentheses")
-var ErrDivideByZero = errors.New("Division by zero")
 
 // Create and initialize a new Calculator.
 func NewCalculator() Calculator {
@@ -190,21 +188,21 @@ func (calc Calculator) evaluate(tokens []string) (float64, error) {
 			val1, _ := valueStack.Pop()
 
 			op := getOperator(tokens[i])
-			evaluatedVal := op.evaluate(val1, val2)
-
-			valueStack.Push(evaluatedVal)
+			if evaluatedVal, err := op.evaluate(val1, val2); err != nil {
+				return 0, err
+			} else {
+				valueStack.Push(evaluatedVal)
+			}
 		} else {
-			value, err := strconv.ParseFloat(tokens[i], 64)
-
-			if err != nil {
+			if value, err := strconv.ParseFloat(tokens[i], 64); err != nil {
 				if calc.Variables().Exists(tokens[i]) {
 					value = calc.Variables().Get(tokens[i])
 				} else {
 					return 0.0, unknownVariable(tokens[i])
 				}
+			} else {
+				valueStack.Push(value)
 			}
-
-			valueStack.Push(value)
 		}
 	}
 

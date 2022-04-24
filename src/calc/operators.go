@@ -15,7 +15,10 @@
 
 package calc
 
-import "math"
+import (
+	"errors"
+	"math"
+)
 
 // Indicates an operator's associativity.
 type associativity byte
@@ -25,12 +28,14 @@ const (
 	associativityRight associativity = iota
 )
 
+var ErrDivideByZero = errors.New("Division by zero")
+
 // Represents an operator.
 type operator struct {
 	token         string
 	precedence    int16
 	associativity associativity
-	evaluate      func(float64, float64) float64
+	evaluate      func(float64, float64) (float64, error)
 }
 
 // Represents an unknown/unsupported operator.
@@ -43,48 +48,51 @@ var operators = [...]operator{
 		token:         "^",
 		precedence:    10,
 		associativity: associativityRight,
-		evaluate: func(a, b float64) float64 {
-			return math.Pow(a, b)
+		evaluate: func(a, b float64) (float64, error) {
+			return math.Pow(a, b), nil
 		},
 	},
 	{
 		token:         "%",
 		precedence:    5,
 		associativity: associativityLeft,
-		evaluate: func(a, b float64) float64 {
-			return math.Mod(a, b)
+		evaluate: func(a, b float64) (float64, error) {
+			return math.Mod(a, b), nil
 		},
 	},
 	{
 		token:         "/",
 		precedence:    5,
 		associativity: associativityLeft,
-		evaluate: func(a, b float64) float64 {
-			return a / b
+		evaluate: func(a, b float64) (float64, error) {
+			if b == 0 {
+				return 0, ErrDivideByZero
+			}
+			return a / b, nil
 		},
 	},
 	{
 		token:         "*",
 		precedence:    5,
 		associativity: associativityLeft,
-		evaluate: func(a, b float64) float64 {
-			return a * b
+		evaluate: func(a, b float64) (float64, error) {
+			return a * b, nil
 		},
 	},
 	{
 		token:         "+",
 		precedence:    0,
 		associativity: associativityLeft,
-		evaluate: func(a, b float64) float64 {
-			return a + b
+		evaluate: func(a, b float64) (float64, error) {
+			return a + b, nil
 		},
 	},
 	{
 		token:         "-",
 		precedence:    0,
 		associativity: associativityLeft,
-		evaluate: func(a, b float64) float64 {
-			return a - b
+		evaluate: func(a, b float64) (float64, error) {
+			return a - b, nil
 		},
 	},
 	invalidOperator,
