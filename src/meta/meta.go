@@ -16,7 +16,7 @@
 package meta
 
 // Replicalc version number
-const VersionNumber = "0.2.0"
+const VersionNumber = "0.3.0"
 
 // Title and copyright statement
 const TitleText string = "Replicalc " + VersionNumber + " Copyright (C) 2022 David Heinemann"
