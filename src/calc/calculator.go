@@ -199,6 +199,7 @@ func (calc Calculator) evaluate(tokens []string) (float64, error) {
 			if value, err := strconv.ParseFloat(tokens[i], 64); err != nil {
 				if calc.Variables().Exists(tokens[i]) {
 					value = calc.Variables().Get(tokens[i])
+					valueStack.Push(value)
 				} else {
 					return 0.0, unknownVariable(tokens[i])
 				}
