@@ -13,50 +13,20 @@
  * GNU General Public License for more details.
  */
 
-package calculator
+package calc
 
 import (
-	"math"
+	"errors"
+	"fmt"
 	"strconv"
 
-	"dheinemann.com/replicalc/chartype"
+	"dheinemann.com/replicalc/chartypes"
 	"dheinemann.com/replicalc/stack"
 )
 
-// Operators
-type operator struct {
-	token         string
-	precedence    byte
-	associativity associativity
+type Calculator struct {
+	Variables func() VariableDb
 }
-
-func getOperator(s string) operator {
-	for i := 0; i < len(operators); i++ {
-		if operators[i].token == s {
-			return operators[i]
-		}
-	}
-
-	return invalidOperator
-}
-
-var invalidOperator = operator{}
-var operators = [...]operator{
-	{"^", 10, associativityRight},
-	{"/", 5, associativityLeft},
-	{"*", 5, associativityLeft},
-	{"+", 0, associativityLeft},
-	{"-", 0, associativityLeft},
-	invalidOperator,
-}
-
-// Operator associativity
-type associativity byte
-
-const (
-	associativityLeft  associativity = iota
-	associativityRight associativity = iota
-)
 
 // Token types
 type tokenType byte
@@ -68,38 +38,46 @@ const (
 	tokenTypeLetter   tokenType = iota
 )
 
-// Test whether a string is a math operator.
-func isOperator(token string) bool {
-	for i := 0; i < len(operators); i++ {
-		if operators[i].token == token {
-			return true
-		}
-	}
-
-	return false
+type unknownVariableError struct {
+	msg      string
+	variable string
 }
 
-// Error codes
-type ErrorCode byte
+func (e unknownVariableError) Error() string {
+	return e.msg
+}
 
-const (
-	ErrorSuccess               ErrorCode = iota
-	ErrorUnbalancedParantheses ErrorCode = iota
-	ErrorDivideByZero          ErrorCode = iota
-)
+func unknownVariable(varName string) error {
+	return unknownVariableError{
+		msg:      fmt.Sprintf("Unknown variable: '%v'", varName),
+		variable: varName,
+	}
+}
+
+var ErrUnbalancedParantheses = errors.New("Unbalanced parentheses")
+
+// Create and initialize a new Calculator.
+func NewCalculator() Calculator {
+	db := newVariableDb()
+	return Calculator{
+		Variables: func() VariableDb {
+			return db
+		},
+	}
+}
 
 // Check whether the character at index i is the negative sign for the number that follows it.
-func isNegative(expr string, i int) bool {
+func (calc Calculator) isNegativeSign(expr string, i int) bool {
 	if expr[i] != '-' {
 		return false
 	}
 
-	nextCharIsNum := i < len(expr) && chartype.IsNumeric(byte(expr[i+1]))
+	nextCharIsNum := i < len(expr) && chartypes.IsNumeric(byte(expr[i+1]))
 	if i == 0 && nextCharIsNum {
 		return true
 	}
 
-	lastCharIsSymbol := chartype.IsSymbol(expr[i-1])
+	lastCharIsSymbol := chartypes.IsSymbol(expr[i-1])
 	lastCharIsSpace := expr[i-1] == ' '
 	if nextCharIsNum && (lastCharIsSymbol || lastCharIsSpace) {
 		return true
@@ -109,7 +87,7 @@ func isNegative(expr string, i int) bool {
 }
 
 // Convert an expression into a series of tokens.
-func tokenize(expr string) []string {
+func (calc Calculator) tokenize(expr string) ([]string, error) {
 	lastTokenType := tokenTypeNone
 	tokens := []string{}
 
@@ -117,7 +95,7 @@ func tokenize(expr string) []string {
 	for i := 0; i < len(expr); i++ {
 		hasUnfinishedToken := len(currentToken) > 0
 
-		if chartype.IsNumeric(expr[i]) || isNegative(expr, i) {
+		if chartypes.IsNumeric(expr[i]) || calc.isNegativeSign(expr, i) {
 			if hasUnfinishedToken && lastTokenType != tokenTypeDigit {
 				tokens = append(tokens, currentToken)
 				currentToken = ""
@@ -125,7 +103,7 @@ func tokenize(expr string) []string {
 
 			currentToken += string(expr[i])
 			lastTokenType = tokenTypeDigit
-		} else if chartype.IsSymbol(expr[i]) {
+		} else if chartypes.IsSymbol(expr[i]) {
 			if hasUnfinishedToken {
 				tokens = append(tokens, currentToken)
 				currentToken = ""
@@ -133,7 +111,7 @@ func tokenize(expr string) []string {
 
 			currentToken += string(expr[i])
 			lastTokenType = tokenTypeOperator
-		} else if chartype.IsLetter(expr[i]) {
+		} else if chartypes.IsLetter(expr[i]) {
 			if hasUnfinishedToken && lastTokenType != tokenTypeLetter {
 				tokens = append(tokens, currentToken)
 				currentToken = ""
@@ -141,6 +119,8 @@ func tokenize(expr string) []string {
 
 			currentToken += string(expr[i])
 			lastTokenType = tokenTypeLetter
+		} else if expr[i] != ' ' {
+			return nil, errors.New(fmt.Sprintf("Unknown character '%s' at index %v", string(expr[i]), i))
 		}
 	}
 
@@ -148,10 +128,10 @@ func tokenize(expr string) []string {
 		tokens = append(tokens, currentToken)
 	}
 
-	return tokens
+	return tokens, nil
 }
 
-func infixToPostfix(tokens []string) []string {
+func (calc Calculator) infixToPostfix(tokens []string) []string {
 	output := []string{}
 
 	ops := stack.StringStack{}
@@ -200,45 +180,40 @@ func infixToPostfix(tokens []string) []string {
 	return output
 }
 
-func evaluate(tokens []string) (result float64, errorCode ErrorCode) {
-	stack := stack.FloatStack{}
+// Evaluate an RPN expression
+func (calc Calculator) evaluate(tokens []string) (float64, error) {
+	valueStack := stack.FloatStack{}
 
 	for i := 0; i < len(tokens); i++ {
-		if isOperator(string(tokens[i])) {
-			op2, _ := stack.Pop()
-			op1, _ := stack.Pop()
+		if isOperator(tokens[i]) {
+			val2, _ := valueStack.Pop()
+			val1, _ := valueStack.Pop()
 
-			if tokens[i] == "/" {
-				if op2 == 0 {
-					return 0, ErrorDivideByZero
-				}
-
-				stack.Push(op1 / op2)
-			}
-
-			if tokens[i] == "*" {
-				stack.Push(op1 * op2)
-			}
-			if tokens[i] == "+" {
-				stack.Push(op1 + op2)
-			}
-			if tokens[i] == "-" {
-				stack.Push(op1 - op2)
-			}
-			if tokens[i] == "^" {
-				stack.Push(math.Pow(op1, op2))
+			op := getOperator(tokens[i])
+			if evaluatedVal, err := op.evaluate(val1, val2); err != nil {
+				return 0, err
+			} else {
+				valueStack.Push(evaluatedVal)
 			}
 		} else {
-			value, _ := strconv.ParseFloat(tokens[i], 64)
-			stack.Push(value)
+			if value, err := strconv.ParseFloat(tokens[i], 64); err != nil {
+				if calc.Variables().Exists(tokens[i]) {
+					value = calc.Variables().Get(tokens[i])
+					valueStack.Push(value)
+				} else {
+					return 0.0, unknownVariable(tokens[i])
+				}
+			} else {
+				valueStack.Push(value)
+			}
 		}
 	}
 
-	nextOp, _ := stack.Pop()
-	return nextOp, ErrorSuccess
+	nextOp, _ := valueStack.Pop()
+	return nextOp, nil
 }
 
-func hasBalancedParantheses(expr string) bool {
+func (calc Calculator) hasBalancedParantheses(expr string) bool {
 	numParens := 0
 	for i := 0; i < len(expr); i++ {
 		if expr[i] == '(' {
@@ -255,16 +230,22 @@ func hasBalancedParantheses(expr string) bool {
 	return numParens == 0
 }
 
-func Calculate(expr string) (result float64, errorCode ErrorCode) {
-	if !hasBalancedParantheses(expr) {
-		return 0, ErrorUnbalancedParantheses
+// Evaluate an expression and return the result.
+func (calc Calculator) Evaluate(expr string) (result float64, err error) {
+	if !calc.hasBalancedParantheses(expr) {
+		return 0, ErrUnbalancedParantheses
 	}
 
 	if len(expr) == 0 {
-		return 0, ErrorSuccess
+		return 0, nil
 	}
 
-	infixTokens := tokenize(expr)
-	postfixTokens := infixToPostfix(infixTokens)
-	return evaluate(postfixTokens)
+	if infixTokens, err := calc.tokenize(expr); err != nil {
+		return 0, err
+	} else {
+		postfixTokens := calc.infixToPostfix(infixTokens)
+		result, err = calc.evaluate(postfixTokens)
+
+		return result, err
+	}
 }

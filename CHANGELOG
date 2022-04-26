@@ -1,0 +1,16 @@
+0.3.0 (2022-04-26):
+
+* Replace bufio with Liner (improved input buffer, with history support)
+* Add support for commands (see 'help')
+* Add support for variables
+* Add modulo operator (%)
+* Fix incorrect printing of negative results
+* Throw error when invalid syntax/operators are used
+
+0.2.0 (2022-04-15):
+
+* Rewrite in Go. Drop MS-DOS support.
+
+0.1.0 (2021-06-26):
+
+* Initial release

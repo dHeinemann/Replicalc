@@ -16,69 +16,145 @@
 package main
 
 import (
-	"bufio"
+	"errors"
 	"fmt"
 	"math"
-	"os"
 	"strconv"
 	"strings"
 
-	"dheinemann.com/replicalc/calculator"
+	"dheinemann.com/replicalc/calc"
+	"dheinemann.com/replicalc/chartypes"
+	"dheinemann.com/replicalc/cmd"
+	"dheinemann.com/replicalc/meta"
+	"github.com/peterh/liner"
 )
 
+// Print Replicalc copyright and license details
 func printCopyright() {
-	fmt.Println("Replicalc 0.2.0, Copyright (C) 2022 David Heinemann")
-	fmt.Println("Replicalc comes with ABSOLUTELY NO WARRANTY.")
-	fmt.Println("This is free software, and you are welcome to redistribute it")
-	fmt.Println("under certain conditions. See the LICENSE file for details.")
+	fmt.Println(meta.TitleText)
+	fmt.Println(meta.LicenseText)
 }
 
-func handleError(errorCode calculator.ErrorCode) {
-	if errorCode == calculator.ErrorSuccess {
-		return
-	} else if errorCode == calculator.ErrorDivideByZero {
-		fmt.Println("Error: Division by zero")
-	} else if errorCode == calculator.ErrorUnbalancedParantheses {
-		fmt.Println("Error: Unbalanced parantheses")
+// Format a float for printing
+func formatFloat(value float64) string {
+	// Omit decimal places when value is a whole number
+	if math.Mod(value, 1) == 0 {
+		return strconv.FormatFloat(value, 'f', 0, 64)
 	} else {
-		fmt.Println("Unexpected error")
+		return strconv.FormatFloat(value, 'f', 4, 64)
 	}
 }
 
-func isExit(input string) bool {
-	return input == "exit" || input == "quit"
+// Print a float
+func printFloat(value float64) {
+	formattedValue := formatFloat(value)
+	fmt.Printf("%v\n", formattedValue)
 }
 
+// Print the value of a variable
+func printVariable(varName string, calculator calc.Calculator) {
+	formattedValue := formatFloat(calculator.Variables().Get(varName))
+	fmt.Printf("%v = %v\n", varName, formattedValue)
+}
+
+// Get the target variable to store an expression in, and the adjusted version of an expression in the event that the
+// user is storing it in a variable other than the default.
+//
+// For example:
+//   "2 * 5"       -> ("ans", "2 * 5")
+//   "foo = 2 * 5" -> ("foo", "2 * 5")
+func getTargetAndExpression(expr string) (varName string, adjustedExpr string, err error) {
+	eqIndex := strings.Index(expr, "=")
+	if eqIndex >= 0 {
+		// Valid syntax for setting variable is 'VARNAME = EXPR'
+		varName = strings.TrimSpace(expr[:eqIndex])
+		adjustedExpr = strings.TrimSpace(expr[eqIndex+1:])
+
+		for i := 0; i < len(varName); i++ {
+			if !chartypes.IsLetter(varName[i]) {
+				return varName, adjustedExpr, errors.New("Variable name must only consist of alphabetical characters")
+			}
+		}
+
+		if len(varName) == 0 {
+			return varName, adjustedExpr, errors.New("Must specify a variable name when using assignment operator (=)")
+		}
+	} else {
+		varName = calc.DefaultVarName
+		adjustedExpr = expr
+	}
+
+	return varName, adjustedExpr, nil
+}
+
+// Start the REPL.
 func repl() {
+	line := liner.NewLiner()
+	defer line.Close()
+
+	line.SetCtrlCAborts(true)
+
+	calculator := calc.NewCalculator()
+
 	for {
-		fmt.Printf("\n> ")
-		reader := bufio.NewReader(os.Stdin)
-		expr, err := reader.ReadString('\n')
+		fmt.Println()
+		input, err := line.Prompt("> ")
+
 		if err != nil {
-			fmt.Println("Error: invalid input")
-			continue
-		}
-
-		expr = strings.Trim(expr, "\n\r ")
-		if isExit(expr) {
-			break
-		}
-
-		result, errorCode := calculator.Calculate(expr)
-		if errorCode != calculator.ErrorSuccess {
-			handleError(errorCode)
-			continue
-		}
-
-		var formattedResult string
-		if math.Mod(result, 1) > 0 {
-			formattedResult = strconv.FormatFloat(result, 'f', 4, 64)
+			if err != liner.ErrPromptAborted {
+				// ErrPromptAborted gets thrown by Ctrl+C
+				fmt.Printf("Fatal error: %v\n", err.Error())
+			}
+			return
 		} else {
-			// Omit decimal places when printing whole numbers
-			formattedResult = strconv.FormatFloat(result, 'f', 0, 64)
+			line.AppendHistory(input)
 		}
 
-		fmt.Printf("%v\n", formattedResult)
+		input = strings.Trim(input, "\n\r ")
+		if len(input) == 0 {
+			continue
+		}
+
+		if cmd.IsCommand(input) {
+			if err := cmd.ExecCommand(input, calculator); err != nil {
+				if err == cmd.ErrExitCommand {
+					return
+				}
+				fmt.Printf("Error: %v\n", err.Error())
+			}
+			continue
+		}
+
+		// User may print the value of a variable by writing its name. In this case, it shouldn't be evaluated as a math
+		// expression.
+		if calculator.Variables().Exists(input) {
+			printVariable(input, calculator)
+			continue
+		}
+
+		varName, input, err := getTargetAndExpression(input)
+		if err != nil {
+			fmt.Printf("Error: %v\n", err.Error())
+			continue
+		}
+
+		result, err := calculator.Evaluate(input)
+		if err != nil {
+			fmt.Printf("Error: %v\n", err.Error())
+			continue
+		}
+
+		// Set the target variable ("ans" by default)
+		varDb := calculator.Variables()
+		varDb.Set(varName, result)
+
+		// Print formatted result
+		if varName != calc.DefaultVarName {
+			// User set non-default variable; show what was set
+			printVariable(varName, calculator)
+		} else {
+			printFloat(result)
+		}
 	}
 }
 

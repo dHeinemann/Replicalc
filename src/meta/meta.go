@@ -13,27 +13,15 @@
  * GNU General Public License for more details.
  */
 
-package chartype
+package meta
 
-// Test whether the given character is numeric.
-func IsNumeric(c byte) bool {
-	return (c >= 48 && c <= 57) /* 0-9 */ ||
-		c == '.' ||
-		c == ','
-}
+// Replicalc version number
+const VersionNumber = "0.3.0"
 
-// Test whether the givencharacter is a letter.
-func IsLetter(c byte) bool {
-	return (c >= 65 && c <= 90) ||
-		(c >= 97 && c <= 122)
-}
+// Title and copyright statement
+const TitleText string = "Replicalc " + VersionNumber + " Copyright (C) 2022 David Heinemann"
 
-// Tets whether the given character is a symbol.
-func IsSymbol(c byte) bool {
-	return c == '^' ||
-		c == '/' ||
-		c == '*' ||
-		c == '+' ||
-		c == '-' ||
-		c == '(' || c == ')'
-}
+// Replicalc license summary
+const LicenseText string = `Replicalc comes with ABSOLUTELY NO WARRANTY.
+This is free software, and you are welcome to redistribute it
+under certain conditions. See the LICENSE file for details.`
